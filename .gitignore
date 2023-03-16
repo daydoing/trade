@@ -12,6 +12,6 @@
 *.out
 
 /testdata/*
-
+.traded.yaml
 # IDE
 .idea
