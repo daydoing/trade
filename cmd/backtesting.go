@@ -18,18 +18,22 @@ func backtestingCommand() *cobra.Command {
 		Short: "Backtesting is to backtest the trading strategy",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				ctx         = context.Background()
-				feedPair    = viper.GetString("pair")
-				feedFile    = viper.GetString("file")
-				assetSymbol = viper.GetString("symbol")
-				assetAmount = viper.GetFloat64("amount")
+				ctx          = context.Background()
+				feedPair     = viper.GetString("pair")
+				feedFile     = viper.GetString("file")
+				assetSymbol  = viper.GetString("symbol")
+				assetAmount  = viper.GetFloat64("amount")
+				strategyName = viper.GetString("strategy")
 			)
 
 			settings := ninjabot.Settings{
 				Pairs: []string{feedPair},
 			}
 
-			strategy := strategies.NewStrategy()
+			strategy, err := strategies.NewStrategy(strategyName)
+			if err != nil {
+				return err
+			}
 
 			csvFeed, err := exchange.NewCSVFeed(
 				strategy.Timeframe(),

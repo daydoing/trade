@@ -18,19 +18,23 @@ func paperwalletCommand() *cobra.Command {
 		Short: "Paperwallet is a simulated run of trading strategies",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				ctx         = context.Background()
-				feedPair    = viper.GetString("pair")
-				maker       = viper.GetFloat64("maker")
-				taker       = viper.GetFloat64("taker")
-				assetSymbol = viper.GetString("symbol")
-				assetAmount = viper.GetFloat64("amount")
+				ctx          = context.Background()
+				feedPair     = viper.GetString("pair")
+				maker        = viper.GetFloat64("maker")
+				taker        = viper.GetFloat64("taker")
+				assetSymbol  = viper.GetString("symbol")
+				assetAmount  = viper.GetFloat64("amount")
+				strategyName = viper.GetString("strategy")
 			)
 
 			settings := ninjabot.Settings{
 				Pairs: []string{feedPair},
 			}
 
-			strategy := strategies.NewStrategy()
+			strategy, err := strategies.NewStrategy(strategyName)
+			if err != nil {
+				return err
+			}
 
 			binance, err := exchange.NewBinance(ctx)
 			if err != nil {
