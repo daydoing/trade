@@ -19,10 +19,10 @@ func backtestingCommand() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
 				ctx         = context.Background()
-				feedPair    = viper.GetString("settings.pair")
-				feedFile    = viper.GetString("feed.file")
-				assetSymbol = viper.GetString("asset.symbol")
-				assetAmount = viper.GetFloat64("asset.amount")
+				feedPair    = viper.GetString("pair")
+				feedFile    = viper.GetString("file")
+				assetSymbol = viper.GetString("symbol")
+				assetAmount = viper.GetFloat64("amount")
 			)
 
 			settings := ninjabot.Settings{

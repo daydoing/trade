@@ -11,10 +11,7 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-/paperwallet
-/backtesting
-/dist/
-/vendor
+/testdata/*
 
 # IDE
 .idea

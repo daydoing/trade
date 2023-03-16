@@ -19,11 +19,11 @@ func paperwalletCommand() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
 				ctx         = context.Background()
-				feedPair    = viper.GetString("settings.pair")
-				maker       = viper.GetFloat64("settings.maker")
-				taker       = viper.GetFloat64("settings.taker")
-				assetSymbol = viper.GetString("asset.symbol")
-				assetAmount = viper.GetFloat64("asset.amount")
+				feedPair    = viper.GetString("pair")
+				maker       = viper.GetFloat64("maker")
+				taker       = viper.GetFloat64("taker")
+				assetSymbol = viper.GetString("symbol")
+				assetAmount = viper.GetFloat64("amount")
 			)
 
 			settings := ninjabot.Settings{
