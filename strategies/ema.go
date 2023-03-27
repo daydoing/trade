@@ -1,8 +1,8 @@
 package strategies
 
 import (
-	"github.com/markcheno/go-talib"
 	"github.com/rodrigo-brito/ninjabot"
+	"github.com/rodrigo-brito/ninjabot/indicator"
 	"github.com/rodrigo-brito/ninjabot/service"
 	"github.com/rodrigo-brito/ninjabot/strategy"
 
@@ -25,7 +25,7 @@ func (e *crossEMA) WarmupPeriod() int {
 
 func (e *crossEMA) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 	// define a custom indicator, Exponential Moving Average of 9 periods
-	df.Metadata["ema9"] = talib.Ema(df.Close, 9)
+	df.Metadata["ema9"] = indicator.EMA(df.Close, 9)
 
 	// (Optional) you can return a list of indicators to include in the final chart
 	return []strategy.ChartIndicator{
