@@ -1,12 +1,12 @@
 package strategies
 
 import (
+	"log"
+
 	"github.com/rodrigo-brito/ninjabot"
 	"github.com/rodrigo-brito/ninjabot/indicator"
 	"github.com/rodrigo-brito/ninjabot/service"
 	"github.com/rodrigo-brito/ninjabot/strategy"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type crossEMA struct{}
@@ -49,14 +49,14 @@ func (e *crossEMA) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 	// Get the quote and assets information
 	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
-		log.Error(err)
+		log.Fatal(err)
 	}
 
 	// Check if we have more than 10 USDT available in the wallet and the buy signal is triggered
 	if quotePosition > 10 && df.Close.Crossover(df.Metadata["ema9"]) {
 		_, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, quotePosition*0.99)
 		if err != nil {
-			log.Error(err)
+			log.Fatal(err)
 		}
 	}
 
@@ -65,7 +65,7 @@ func (e *crossEMA) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 		df.Close.Crossunder(df.Metadata["ema9"]) {
 		_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 		if err != nil {
-			log.Error(err)
+			log.Fatal(err)
 		}
 	}
 }
