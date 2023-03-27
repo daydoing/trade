@@ -9,17 +9,21 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type CrossEMA struct{}
+type crossEMA struct{}
 
-func (e CrossEMA) Timeframe() string {
+func NewCrossEMA() strategy.Strategy {
+	return &crossEMA{}
+}
+
+func (e *crossEMA) Timeframe() string {
 	return "1d" // examples: 1m, 5m, 15m, 30m, 1h, 4h, 12h, 1d, 1w
 }
 
-func (e CrossEMA) WarmupPeriod() int {
+func (e *crossEMA) WarmupPeriod() int {
 	return 9 // warmup period, to preload indicators
 }
 
-func (e CrossEMA) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
+func (e *crossEMA) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 	// define a custom indicator, Exponential Moving Average of 9 periods
 	df.Metadata["ema9"] = talib.Ema(df.Close, 9)
 
@@ -41,7 +45,7 @@ func (e CrossEMA) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 	}
 }
 
-func (e *CrossEMA) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
+func (e *crossEMA) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 	// Get the quote and assets information
 	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {

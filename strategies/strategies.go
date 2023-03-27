@@ -7,13 +7,16 @@ import (
 )
 
 const (
-	EMA = "ema"
+	EMA    = "ema"
+	TROUGH = "trough"
 )
 
 func NewStrategy(strategy string) (strategy.Strategy, error) {
 	switch strategy {
 	case EMA:
-		return new(CrossEMA), nil
+		return NewCrossEMA(), nil
+	case TROUGH:
+		return NewTrough("15m", 9), nil
 	default:
 		return nil, errors.New("unsupported trading strategy")
 	}
