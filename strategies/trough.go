@@ -1,6 +1,8 @@
 package strategies
 
 import (
+	"log"
+
 	"github.com/rodrigo-brito/ninjabot"
 	"github.com/rodrigo-brito/ninjabot/indicator"
 	"github.com/rodrigo-brito/ninjabot/model"
@@ -38,13 +40,13 @@ func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 
 	asset, quote, err := broker.Position(df.Pair)
 	if err != nil {
-		return
+		log.Fatal(err)
 	}
 
 	if quote > 10.0 && asset*df.Close.Last(0) < 10 && currentPrice <= lowestPrice*1.01 {
 		order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, quote)
 		if err != nil {
-			return
+			log.Fatal(err)
 		}
 
 		t.order = order
@@ -54,7 +56,7 @@ func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 		if currentPrice <= t.order.Price*0.95 {
 			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, asset)
 			if err != nil {
-				return
+				log.Fatal(err)
 			}
 		}
 
