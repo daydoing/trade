@@ -48,7 +48,7 @@ func paperwalletCommand() *cobra.Command {
 
 			wallet := exchange.NewPaperWallet(
 				ctx,
-				feedPair,
+				assetSymbol,
 				exchange.WithPaperFee(maker, taker),
 				exchange.WithPaperAsset(assetSymbol, assetAmount),
 				exchange.WithDataFeed(binance),
