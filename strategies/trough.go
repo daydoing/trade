@@ -1,7 +1,9 @@
 package strategies
 
 import (
+	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/rodrigo-brito/ninjabot"
 	"github.com/rodrigo-brito/ninjabot/indicator"
@@ -18,17 +20,19 @@ const (
 )
 
 type trough struct {
-	period        int
-	gridNumber    int
-	currentGrid   int
-	gridQuantity  float64
-	totalCost     float64
-	totalQuantity float64
-	timeframe     string
-	order         model.Order
+	period          int
+	currentGrid     int
+	gridNumber      float64
+	gridQuantity    float64
+	totalCost       float64
+	totalQuantity   float64
+	stopLosePoint   float64
+	takeProfitPoint float64
+	timeframe       string
+	order           model.Order
 }
 
-func NewTrough(timeframe string, period int, gridNumber int) strategy.HighFrequencyStrategy {
+func NewTrough(timeframe string, period int, gridNumber float64) strategy.HighFrequencyStrategy {
 	return &trough{timeframe: timeframe, period: period, gridNumber: gridNumber}
 }
 
@@ -56,7 +60,7 @@ func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 	currentPrice := df.Close.Last(0)
 
 	if t.currentGrid == 0 {
-		t.gridQuantity = quantity / float64(t.gridNumber)
+		t.gridQuantity = quantity / t.gridNumber
 
 		if quantity > minQuantity && currentPrice <= lowestPrice*buySwing {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
@@ -67,10 +71,15 @@ func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 			t.order = order
 			t.totalQuantity = t.totalQuantity + t.order.Quantity
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
+			t.stopLosePoint = (t.totalCost / t.totalQuantity) * downRate
+			t.takeProfitPoint = (t.totalCost / t.totalQuantity) * upRate
 			t.currentGrid++
 		}
 	} else {
-		if quantity >= t.gridQuantity && currentPrice <= t.order.Price*downRate {
+		discountStr := fmt.Sprintf("%.2f", downRate-(1.0-downRate)*float64(t.currentGrid-1))
+		discount, _ := strconv.ParseFloat(discountStr, 64)
+
+		if quantity >= t.gridQuantity && currentPrice <= t.order.Price*discount {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 			if err != nil {
 				log.Fatal(err)
@@ -79,13 +88,26 @@ func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 			t.order = order
 			t.totalQuantity = t.totalQuantity + t.order.Quantity
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
+			t.stopLosePoint = (t.totalCost / t.totalQuantity) * downRate
+			t.takeProfitPoint = (t.totalCost / t.totalQuantity) * upRate
 			t.currentGrid++
 		}
 	}
 
-	if t.totalQuantity > 0 {
-		avp := t.totalCost / t.totalQuantity
-		if t.totalQuantity > minQuantity && currentPrice >= avp*upRate {
+	if t.totalQuantity > minQuantity {
+		if currentPrice <= t.stopLosePoint {
+			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.totalQuantity)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			t.order = order
+			t.totalQuantity = t.totalQuantity - t.order.Quantity
+			t.totalCost = t.totalCost - t.order.Price*t.order.Quantity
+			t.currentGrid = 0
+		}
+
+		if currentPrice >= t.takeProfitPoint {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.totalQuantity)
 			if err != nil {
 				log.Fatal(err)
