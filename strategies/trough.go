@@ -16,19 +16,20 @@ const (
 	minQuantity = 10.0
 	buySwing    = 1 + (1.0 / 100)
 	downRate    = 1 - (5.0 / 100)
-	upRate      = 1 + (5.0 / 100)
+	upRate      = 1 + (10.0 / 100)
 )
 
 type trough struct {
-	period        int
-	currentGrid   int
-	gridNumber    float64
-	gridQuantity  float64
-	totalCost     float64
-	totalQuantity float64
-	stopLosePoint float64
-	timeframe     string
-	order         model.Order
+	period              int
+	currentGrid         int
+	gridNumber          float64
+	gridQuantity        float64
+	totalCost           float64
+	totalQuantity       float64
+	stopLosePoint       float64
+	averagePurchaseCost float64
+	timeframe           string
+	order               model.Order
 }
 
 func NewTrough(timeframe string, period int, gridNumber float64) strategy.HighFrequencyStrategy {
@@ -70,7 +71,8 @@ func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 			t.order = order
 			t.totalQuantity = t.totalQuantity + t.order.Quantity
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
-			t.stopLosePoint = (t.totalCost / t.totalQuantity) * downRate
+			t.averagePurchaseCost = t.totalCost / t.totalQuantity
+			t.stopLosePoint = t.averagePurchaseCost
 			t.currentGrid++
 		}
 	} else {
@@ -86,15 +88,18 @@ func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 			t.order = order
 			t.totalQuantity = t.totalQuantity + t.order.Quantity
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
-			t.stopLosePoint = (t.totalCost / t.totalQuantity) * downRate
+			t.averagePurchaseCost = t.totalCost / t.totalQuantity
+			t.stopLosePoint = t.averagePurchaseCost
 			t.currentGrid++
 		}
 	}
 
 	if t.totalQuantity > minQuantity {
-		if currentPrice >= t.stopLosePoint {
+		if currentPrice > t.stopLosePoint {
 			t.stopLosePoint = currentPrice
-		} else {
+		}
+
+		if t.stopLosePoint < t.averagePurchaseCost*downRate || t.stopLosePoint > t.averagePurchaseCost*upRate {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.totalQuantity)
 			if err != nil {
 				log.Fatal(err)
