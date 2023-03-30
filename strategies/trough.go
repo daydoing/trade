@@ -14,9 +14,7 @@ import (
 
 const (
 	minQuantity = 10.0
-	buySwing    = 1 + (1.0 / 100)
-	downRate    = 1 - (5.0 / 100)
-	upRate      = 1 + (10.0 / 100)
+	buySwing    = 1 + (0.5 / 100)
 )
 
 type trough struct {
@@ -28,12 +26,20 @@ type trough struct {
 	totalQuantity       float64
 	stopLosePoint       float64
 	averagePurchaseCost float64
+	downRate            float64
+	upRate              float64
 	timeframe           string
 	order               model.Order
 }
 
-func NewTrough(timeframe string, period int, gridNumber float64) strategy.HighFrequencyStrategy {
-	return &trough{timeframe: timeframe, period: period, gridNumber: gridNumber}
+func NewTrough(timeframe string, period int, gridNumber float64, downRate float64, upRate float64) strategy.HighFrequencyStrategy {
+	return &trough{
+		timeframe:  timeframe,
+		period:     period,
+		gridNumber: gridNumber,
+		downRate:   1 - (downRate / 100),
+		upRate:     1 + (upRate / 100),
+	}
 }
 
 func (t *trough) Timeframe() string {
@@ -76,7 +82,7 @@ func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 			t.currentGrid++
 		}
 	} else {
-		discountStr := fmt.Sprintf("%.2f", downRate-(1.0-downRate)*float64(t.currentGrid-1))
+		discountStr := fmt.Sprintf("%.2f", t.downRate-(1.0-t.downRate)*float64(t.currentGrid-1))
 		discount, _ := strconv.ParseFloat(discountStr, 64)
 
 		if quantity >= t.gridQuantity && currentPrice <= t.order.Price*discount {
@@ -99,7 +105,7 @@ func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 			t.stopLosePoint = currentPrice
 		}
 
-		if t.stopLosePoint < t.averagePurchaseCost*downRate || t.stopLosePoint > t.averagePurchaseCost*upRate {
+		if t.stopLosePoint < t.averagePurchaseCost*t.downRate || t.stopLosePoint > t.averagePurchaseCost*t.upRate {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.totalQuantity)
 			if err != nil {
 				log.Fatal(err)
