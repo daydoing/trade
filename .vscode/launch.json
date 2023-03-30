@@ -20,5 +20,13 @@
             "program": "${workspaceFolder}",
             "args": ["paperwallet", "-c", ".traded.yaml"]
         },
+        {
+            "name": "Wallet",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": ["wallet", "-c", ".traded.yaml"]
+        },
     ]
 }

@@ -24,6 +24,7 @@ func init() {
 	rootCmd.AddCommand(backtestingCommand())
 	rootCmd.AddCommand(paperwalletCommand())
 	rootCmd.AddCommand(downloadCommand())
+	rootCmd.AddCommand(walletCommand())
 }
 
 func initConfig() {
