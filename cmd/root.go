@@ -19,7 +19,7 @@ var (
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default $HOME/.traded.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default ./traded.yaml)")
 
 	rootCmd.AddCommand(backtestingCommand())
 	rootCmd.AddCommand(paperwalletCommand())
@@ -31,12 +31,12 @@ func initConfig() {
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
-		home, err := os.UserHomeDir()
+		home, err := os.Getwd()
 		cobra.CheckErr(err)
 
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".traded")
+		viper.SetConfigName("traded")
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
