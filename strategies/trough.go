@@ -119,4 +119,65 @@ func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 	}
 }
 
-func (t *trough) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) {}
+func (t *trough) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) {
+	_, quantity, err := broker.Position(df.Pair)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lowestPrice := df.Metadata["lowestPrice"].Last(0)
+	currentPrice := df.Close.Last(0)
+
+	if t.currentGrid == 0 {
+		t.gridQuantity = quantity / t.gridNumber
+
+		if quantity > minQuantity && currentPrice <= lowestPrice*buySwing {
+			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			t.order = order
+			t.totalQuantity = t.totalQuantity + t.order.Quantity
+			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
+			t.averagePurchaseCost = t.totalCost / t.totalQuantity
+			t.stopLosePoint = t.averagePurchaseCost
+			t.currentGrid++
+		}
+	} else {
+		discountStr := fmt.Sprintf("%.2f", t.downRate-(1.0-t.downRate)*float64(t.currentGrid-1))
+		discount, _ := strconv.ParseFloat(discountStr, 64)
+
+		if quantity >= t.gridQuantity && currentPrice <= t.order.Price*discount {
+			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			t.order = order
+			t.totalQuantity = t.totalQuantity + t.order.Quantity
+			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
+			t.averagePurchaseCost = t.totalCost / t.totalQuantity
+			t.stopLosePoint = t.averagePurchaseCost
+			t.currentGrid++
+		}
+	}
+
+	if t.totalQuantity > minQuantity {
+		if currentPrice > t.stopLosePoint {
+			t.stopLosePoint = currentPrice
+		}
+
+		if t.stopLosePoint < t.averagePurchaseCost*t.downRate || t.stopLosePoint > t.averagePurchaseCost*t.upRate {
+			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.totalQuantity)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			t.order = order
+			t.totalQuantity = t.totalQuantity - t.order.Quantity
+			t.totalCost = t.totalCost - t.order.Price*t.order.Quantity
+			t.currentGrid = 0
+		}
+	}
+}
