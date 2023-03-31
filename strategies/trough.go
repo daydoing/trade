@@ -107,21 +107,21 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		}
 	}
 
-	if t.totalQuantity > minQuantity {
+	if t.totalCost > minQuantity {
 		if currentPrice > t.stopLosePoint {
 			t.stopLosePoint = currentPrice
 		}
 
 		if t.stopLosePoint < t.averagePurchaseCost*t.downRate || t.stopLosePoint > t.averagePurchaseCost*t.upRate {
-			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.totalQuantity)
+			order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, t.totalQuantity)
 			if err != nil {
 				log.Fatal(err)
 			}
 
 			t.order = order
-			t.totalQuantity = t.totalQuantity - t.order.Quantity
-			t.totalCost = t.totalCost - t.order.Price*t.order.Quantity
-			t.currentGrid = 0
+			t.totalQuantity = 0.0
+			t.totalCost = 0.0
+			t.currentGrid = 0.0
 		}
 	}
 }
