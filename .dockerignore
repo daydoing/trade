@@ -1,4 +1,4 @@
-.vscode/
-.testdata/
+.vscode/*
+.testdata/*
 .gitignore
 ninjabot.db
