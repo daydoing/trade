@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	minQuantity = 10.0
-	buySwing    = 1 + (1.0 / 100)
+	minQuote = 10.0
+	buySwing = 1 + (1.0 / 100)
 )
 
 type trough struct {
@@ -74,7 +74,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 
 	if t.currentGrid == 0 {
 		t.gridQuantity = quotePosition / t.gridNumber
-		if quotePosition > minQuantity && closePrice <= lowestPrice*buySwing {
+		if quotePosition > minQuote && closePrice <= lowestPrice*buySwing {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 			if err != nil {
 				log.Error(err)
@@ -106,7 +106,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		}
 	}
 
-	if t.totalCost > minQuantity {
+	if t.totalCost > minQuote {
 		if closePrice > t.stopLosePoint {
 			t.stopLosePoint = closePrice
 		}
