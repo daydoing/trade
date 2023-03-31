@@ -16,6 +16,7 @@ RUN apk --no-cache add ca-certificates
 
 # Copy the binary file to the container
 COPY --from=builder /app/trade /app/trade
+COPY --from=builder /app/traded.yaml /app/traded.yaml
 
 # Set the entry command and arguments
-ENTRYPOINT [ "/app/trade" ]
+ENTRYPOINT [ "/app/trade", "-c", "/app/traded.yaml" ]
