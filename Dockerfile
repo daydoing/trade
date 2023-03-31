@@ -1,5 +1,5 @@
 # Use golang as the base image
-FROM golang:1.20.2-alpine AS builder
+FROM docker.io/golang:1.20.2-alpine AS builder
 
 # Create a working directory
 WORKDIR /app
@@ -11,7 +11,7 @@ COPY . .
 RUN go build -o trade main.go
 
 # Create the final Docker image
-FROM alpine:latest
+FROM docker.io/alpine:latest
 RUN apk --no-cache add ca-certificates
 
 # Copy the binary file to the container
