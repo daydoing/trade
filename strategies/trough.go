@@ -2,7 +2,6 @@ package strategies
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/rodrigo-brito/ninjabot"
@@ -10,6 +9,7 @@ import (
 	"github.com/rodrigo-brito/ninjabot/model"
 	"github.com/rodrigo-brito/ninjabot/service"
 	"github.com/rodrigo-brito/ninjabot/strategy"
+	"github.com/rodrigo-brito/ninjabot/tools/log"
 )
 
 const (
@@ -64,21 +64,20 @@ func (t *trough) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) 
 }
 
 func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
-	_, quantity, err := broker.Position(df.Pair)
+	_, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	lowestPrice := df.Metadata["lowestPrice"].Last(0)
-	currentPrice := df.Close.Last(0)
+	closePrice := df.Close.Last(0)
 
 	if t.currentGrid == 0 {
-		t.gridQuantity = quantity / t.gridNumber
-
-		if quantity > minQuantity && currentPrice <= lowestPrice*buySwing {
+		t.gridQuantity = quotePosition / t.gridNumber
+		if quotePosition > minQuantity && closePrice <= lowestPrice*buySwing {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 			if err != nil {
-				log.Fatal(err)
+				log.Error(err)
 			}
 
 			t.order = order
@@ -92,10 +91,10 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		discountStr := fmt.Sprintf("%.2f", 1.0-(1.0-t.downRate)*float64(t.currentGrid))
 		discount, _ := strconv.ParseFloat(discountStr, 64)
 
-		if quantity >= t.gridQuantity && currentPrice <= t.order.Price*discount {
+		if quotePosition >= t.gridQuantity && closePrice <= t.order.Price*discount {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 			if err != nil {
-				log.Fatal(err)
+				log.Error(err)
 			}
 
 			t.order = order
@@ -108,14 +107,14 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	}
 
 	if t.totalCost > minQuantity {
-		if currentPrice > t.stopLosePoint {
-			t.stopLosePoint = currentPrice
+		if closePrice > t.stopLosePoint {
+			t.stopLosePoint = closePrice
 		}
 
 		if t.stopLosePoint < t.averagePurchaseCost*t.downRate || t.stopLosePoint > t.averagePurchaseCost*t.upRate {
-			order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, t.totalQuantity)
+			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.totalCost)
 			if err != nil {
-				log.Fatal(err)
+				log.Error(err)
 			}
 
 			t.order = order
