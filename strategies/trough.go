@@ -89,7 +89,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.currentGrid++
 		}
 	} else {
-		discountStr := fmt.Sprintf("%.2f", t.downRate-(1.0-t.downRate)*float64(t.currentGrid-1))
+		discountStr := fmt.Sprintf("%.2f", 1.0-(1.0-t.downRate)*float64(t.currentGrid))
 		discount, _ := strconv.ParseFloat(discountStr, 64)
 
 		if quantity >= t.gridQuantity && currentPrice <= t.order.Price*discount {
