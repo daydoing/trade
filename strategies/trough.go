@@ -64,7 +64,7 @@ func (t *trough) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) 
 }
 
 func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
-	_, quotePosition, err := broker.Position(df.Pair)
+	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		}
 
 		if t.stopLosePoint < t.averagePurchaseCost*t.downRate || t.stopLosePoint > t.averagePurchaseCost*t.upRate {
-			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.totalCost)
+			order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 			if err != nil {
 				log.Error(err)
 			}
