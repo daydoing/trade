@@ -2,3 +2,4 @@
 .testdata/*
 .gitignore
 ninjabot.db
+traded.yaml
