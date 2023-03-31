@@ -14,7 +14,7 @@ import (
 
 const (
 	minQuantity = 10.0
-	buySwing    = 1 + (0.5 / 100)
+	buySwing    = 1 + (1.0 / 100)
 )
 
 type trough struct {
