@@ -11,10 +11,10 @@ import (
 	"github.com/daydoing/trade/strategies"
 )
 
-func walletCommand() *cobra.Command {
+func futuresMarketCommand() *cobra.Command {
 	return &cobra.Command{
-		Use:   "wallet",
-		Short: "wallet run of trading strategies",
+		Use:   "futures",
+		Short: "Running futures trading strategies",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
 				ctx           = context.Background()
@@ -35,7 +35,11 @@ func walletCommand() *cobra.Command {
 				},
 			}
 
-			binance, err := exchange.NewBinance(ctx, exchange.WithBinanceCredentials(apiKey, secretKey))
+			binance, err := exchange.NewBinanceFuture(
+				ctx,
+				exchange.WithBinanceFutureCredentials(apiKey, secretKey),
+				exchange.WithBinanceFutureLeverage(feedPair, 1, exchange.MarginTypeIsolated),
+			)
 			if err != nil {
 				return err
 			}

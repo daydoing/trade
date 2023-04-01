@@ -24,7 +24,8 @@ func init() {
 	rootCmd.AddCommand(backtestingCommand())
 	rootCmd.AddCommand(paperwalletCommand())
 	rootCmd.AddCommand(downloadCommand())
-	rootCmd.AddCommand(walletCommand())
+	rootCmd.AddCommand(spotMarketCommand())
+	rootCmd.AddCommand(futuresMarketCommand())
 }
 
 func initConfig() {

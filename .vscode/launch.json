@@ -21,12 +21,20 @@
             "args": ["paperwallet", "-c", "traded.yaml"]
         },
         {
-            "name": "Wallet",
+            "name": "Spot",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["wallet", "-c", "traded.yaml"]
+            "args": ["spot", "-c", "traded.yaml"]
+        },
+        {
+            "name": "Futures",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": ["futures", "-c", "traded.yaml"]
         },
     ]
 }
