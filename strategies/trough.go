@@ -104,18 +104,16 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	}
 
 	if t.totalCost > minQuote && quotePosition < t.gridQuantity {
-		if closePrice < t.averagePurchaseCost*t.downRate || closePrice > t.averagePurchaseCost*t.upRate {
-			takeProfitPoint := t.averagePurchaseCost * t.upRate
-			stopLosePoint := t.averagePurchaseCost * t.downRate
+		takeProfitPoint := t.averagePurchaseCost * t.upRate
+		stopLosePoint := t.averagePurchaseCost * t.downRate
 
-			_, err := broker.CreateOrderOCO(ninjabot.SideTypeSell, df.Pair, assetPosition, takeProfitPoint, stopLosePoint, stopLosePoint)
-			if err != nil {
-				return
-			}
-
-			t.totalQuantity = 0.0
-			t.totalCost = 0.0
-			t.currentGrid = 0.0
+		_, err := broker.CreateOrderOCO(ninjabot.SideTypeSell, df.Pair, assetPosition, takeProfitPoint, stopLosePoint, stopLosePoint)
+		if err != nil {
+			return
 		}
+
+		t.totalQuantity = 0.0
+		t.totalCost = 0.0
+		t.currentGrid = 0.0
 	}
 }
