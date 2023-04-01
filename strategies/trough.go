@@ -24,7 +24,6 @@ type trough struct {
 	gridQuantity        float64
 	totalCost           float64
 	totalQuantity       float64
-	stopLosePoint       float64
 	averagePurchaseCost float64
 	downRate            float64
 	upRate              float64
@@ -84,7 +83,6 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.totalQuantity = t.totalQuantity + t.order.Quantity
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
-			t.stopLosePoint = t.averagePurchaseCost
 			t.currentGrid++
 		}
 	} else {
@@ -101,17 +99,12 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.totalQuantity = t.totalQuantity + t.order.Quantity
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
-			t.stopLosePoint = t.averagePurchaseCost
 			t.currentGrid++
 		}
 	}
 
 	if t.totalCost > minQuote {
-		if closePrice > t.stopLosePoint {
-			t.stopLosePoint = closePrice
-		}
-
-		if t.stopLosePoint < t.averagePurchaseCost*t.downRate || t.stopLosePoint > t.averagePurchaseCost*t.upRate {
+		if closePrice < t.averagePurchaseCost*t.downRate || closePrice > t.averagePurchaseCost*t.upRate {
 			order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 			if err != nil {
 				log.Error(err)
