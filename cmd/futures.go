@@ -22,6 +22,7 @@ func futuresMarketCommand() *cobra.Command {
 				strategyName  = viper.GetString("strategy")
 				apiKey        = viper.GetString("binance.key")
 				secretKey     = viper.GetString("binance.secret")
+				leverage      = viper.GetInt("binance.leverage")
 				telegramToken = viper.GetString("telegram.token")
 				telegramUser  = viper.GetInt("telegram.uid")
 			)
@@ -38,7 +39,7 @@ func futuresMarketCommand() *cobra.Command {
 			binance, err := exchange.NewBinanceFuture(
 				ctx,
 				exchange.WithBinanceFutureCredentials(apiKey, secretKey),
-				exchange.WithBinanceFutureLeverage(feedPair, 1, exchange.MarginTypeIsolated),
+				exchange.WithBinanceFutureLeverage(feedPair, leverage, exchange.MarginTypeIsolated),
 			)
 			if err != nil {
 				return err
