@@ -103,7 +103,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		}
 	}
 
-	if t.totalCost > minQuote {
+	if t.totalCost > minQuote && quotePosition < t.gridQuantity {
 		if closePrice < t.averagePurchaseCost*t.downRate || closePrice > t.averagePurchaseCost*t.upRate {
 			order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 			if err != nil {
