@@ -104,7 +104,10 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	}
 
 	if t.totalCost > minQuote {
-		if closePrice < t.averagePurchaseCost*t.downRate && quotePosition < t.gridQuantity {
+		stopLose := t.averagePurchaseCost * t.downRate
+		takeProfit := t.averagePurchaseCost * t.upRate
+
+		if closePrice <= stopLose && quotePosition < t.gridQuantity {
 			order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 			if err != nil {
 				log.Error(err)
@@ -116,7 +119,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.currentGrid = 0.0
 		}
 
-		if closePrice > t.averagePurchaseCost*t.upRate {
+		if closePrice >= takeProfit {
 			order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 			if err != nil {
 				log.Error(err)
