@@ -2,6 +2,7 @@ package strategies
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/rodrigo-brito/ninjabot"
@@ -73,7 +74,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	closePrice := df.Close.Last(0)
 
 	if t.currentGrid == 0 {
-		t.gridQuantity = quotePosition / t.gridNumber
+		t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
 		if quotePosition > minQuote && closePrice <= lowestPrice*buySwing {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 			if err != nil {
