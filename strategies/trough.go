@@ -16,7 +16,7 @@ import (
 
 const (
 	minQuote = 10.0
-	buySwing = 1 + (1.0 / 100)
+	buySwing = 1 + (0.5 / 100)
 )
 
 type trough struct {
@@ -52,7 +52,9 @@ func (t *trough) WarmupPeriod() int {
 }
 
 func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
-	df.Metadata["lowestPrice"] = indicator.Min(df.Low, t.WarmupPeriod())
+	df.Metadata["minPrice"] = indicator.Min(df.Low, t.WarmupPeriod())
+	df.Metadata["maxPrice"] = indicator.Max(df.High, t.WarmupPeriod())
+
 	return nil
 }
 
@@ -70,12 +72,12 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		log.Fatal(err)
 	}
 
-	lowestPrice := df.Metadata["lowestPrice"].Last(0)
+	minPrice := df.Metadata["minPrice"].Last(0)
 	closePrice := df.Close.Last(0)
 
 	if t.currentGrid == 0 {
 		t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
-		if quotePosition > minQuote && closePrice <= lowestPrice*buySwing {
+		if quotePosition > minQuote && closePrice <= minPrice*buySwing {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 			if err != nil {
 				log.Error(err)
