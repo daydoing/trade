@@ -16,7 +16,7 @@ import (
 
 const (
 	minQuote = 10.0
-	buySwing = 1 + (0.5 / 100)
+	buySwing = 0.5
 )
 
 type trough struct {
@@ -38,7 +38,7 @@ func NewTrough(timeframe string, period int, gridNumber float64, drawdown float6
 		timeframe:    timeframe,
 		period:       period,
 		gridNumber:   gridNumber,
-		drawdown:     1 - (drawdown / 100),
+		drawdown:     drawdown,
 		trailingStop: tools.NewTrailingStop(),
 	}
 }
@@ -77,7 +77,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 
 	if t.currentGrid == 0 {
 		t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
-		if quotePosition > minQuote && closePrice <= minPrice*buySwing {
+		if quotePosition > minQuote && closePrice <= minPrice*(1+buySwing/100) {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 			if err != nil {
 				log.Error(err)
@@ -89,10 +89,10 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
 			t.currentGrid++
 
-			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*t.drawdown)
+			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*(1-t.drawdown/100))
 		}
 	} else {
-		discountStr := fmt.Sprintf("%.2f", 1.0-(1.0-t.drawdown)*float64(t.currentGrid))
+		discountStr := fmt.Sprintf("%.2f", 1.0-(t.drawdown/100)*float64(t.currentGrid))
 		discount, _ := strconv.ParseFloat(discountStr, 64)
 
 		if quotePosition >= t.gridQuantity && closePrice <= t.order.Price*discount {
@@ -107,7 +107,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
 			t.currentGrid++
 
-			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*t.drawdown)
+			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*(1-t.drawdown/100))
 		}
 	}
 
