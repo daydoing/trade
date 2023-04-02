@@ -5,6 +5,7 @@ import (
 
 	"github.com/rodrigo-brito/ninjabot/download"
 	"github.com/rodrigo-brito/ninjabot/exchange"
+	"github.com/rodrigo-brito/ninjabot/service"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -14,7 +15,6 @@ func downloadCommand() *cobra.Command {
 		Use:   "download",
 		Short: "Download historical data for user backtesting",
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			var (
 				ctx       = context.Background()
 				pair      = viper.GetString("pair")
@@ -22,11 +22,26 @@ func downloadCommand() *cobra.Command {
 				file      = viper.GetString("file")
 				start     = viper.GetTime("start")
 				end       = viper.GetTime("end")
+				futures   = viper.GetBool("futures")
 			)
 
-			exc, err := exchange.NewBinance(ctx)
-			if err != nil {
-				return err
+			var (
+				exc service.Feeder
+				err error
+			)
+
+			if futures {
+				// fetch data from binance futures
+				exc, err = exchange.NewBinanceFuture(ctx)
+				if err != nil {
+					return err
+				}
+			} else {
+				// fetch data from binance spot
+				exc, err = exchange.NewBinance(ctx)
+				if err != nil {
+					return err
+				}
 			}
 
 			var options []download.Option
