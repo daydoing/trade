@@ -9,6 +9,7 @@ import (
 	"github.com/rodrigo-brito/ninjabot/model"
 	"github.com/rodrigo-brito/ninjabot/service"
 	"github.com/rodrigo-brito/ninjabot/strategy"
+	"github.com/rodrigo-brito/ninjabot/tools"
 	"github.com/rodrigo-brito/ninjabot/tools/log"
 )
 
@@ -25,19 +26,19 @@ type trough struct {
 	totalCost           float64
 	totalQuantity       float64
 	averagePurchaseCost float64
-	downRate            float64
-	upRate              float64
+	drawdown            float64
 	timeframe           string
 	order               model.Order
+	trailingStop        *tools.TrailingStop
 }
 
-func NewTrough(timeframe string, period int, gridNumber float64, downRate float64, upRate float64) strategy.HighFrequencyStrategy {
+func NewTrough(timeframe string, period int, gridNumber float64, drawdown float64) strategy.HighFrequencyStrategy {
 	return &trough{
-		timeframe:  timeframe,
-		period:     period,
-		gridNumber: gridNumber,
-		downRate:   1 - (downRate / 100),
-		upRate:     1 + (upRate / 100),
+		timeframe:    timeframe,
+		period:       period,
+		gridNumber:   gridNumber,
+		drawdown:     1 - (drawdown / 100),
+		trailingStop: tools.NewTrailingStop(),
 	}
 }
 
@@ -84,9 +85,11 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
 			t.currentGrid++
+
+			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*t.drawdown)
 		}
 	} else {
-		discountStr := fmt.Sprintf("%.2f", 1.0-(1.0-t.downRate)*float64(t.currentGrid))
+		discountStr := fmt.Sprintf("%.2f", 1.0-(1.0-t.drawdown)*float64(t.currentGrid))
 		discount, _ := strconv.ParseFloat(discountStr, 64)
 
 		if quotePosition >= t.gridQuantity && closePrice <= t.order.Price*discount {
@@ -100,35 +103,42 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
 			t.currentGrid++
+
+			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*t.drawdown)
 		}
 	}
 
 	if t.totalCost > minQuote {
-		stopLose := t.averagePurchaseCost * t.downRate
-		takeProfit := t.averagePurchaseCost * t.upRate
+		if closePrice < t.averagePurchaseCost && quotePosition < t.gridQuantity {
+			if trailing := t.trailingStop; trailing != nil && trailing.Update(closePrice) {
+				order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
+				if err != nil {
+					log.Error(err)
+				}
 
-		if closePrice <= stopLose && quotePosition < t.gridQuantity {
-			order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
-			if err != nil {
-				log.Error(err)
+				t.order = order
+				t.totalQuantity = 0.0
+				t.totalCost = 0.0
+				t.currentGrid = 0.0
+
+				t.trailingStop.Stop()
 			}
-
-			t.order = order
-			t.totalQuantity = 0.0
-			t.totalCost = 0.0
-			t.currentGrid = 0.0
 		}
 
-		if closePrice >= takeProfit {
-			order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
-			if err != nil {
-				log.Error(err)
-			}
+		if closePrice > t.averagePurchaseCost {
+			if trailing := t.trailingStop; trailing != nil && trailing.Update(closePrice) {
+				order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
+				if err != nil {
+					log.Error(err)
+				}
 
-			t.order = order
-			t.totalQuantity = 0.0
-			t.totalCost = 0.0
-			t.currentGrid = 0.0
+				t.order = order
+				t.totalQuantity = 0.0
+				t.totalCost = 0.0
+				t.currentGrid = 0.0
+
+				t.trailingStop.Stop()
+			}
 		}
 	}
 }
