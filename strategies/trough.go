@@ -73,11 +73,12 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	}
 
 	minPrice := df.Metadata["minPrice"].Last(0)
+	maxPrice := df.Metadata["maxPrice"].Last(0)
 	closePrice := df.Close.Last(0)
 
 	if t.currentGrid == 0 {
 		t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
-		if quotePosition > minQuote && closePrice <= minPrice*(1+buySwing/100) {
+		if quotePosition > minQuote && closePrice <= minPrice*(1+buySwing/100) && closePrice <= maxPrice*(1-buySwing/100) {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 			if err != nil {
 				log.Error(err)
