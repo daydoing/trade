@@ -160,23 +160,22 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	}
 
 	if t.totalCost > minQuote {
-		if closePrice < t.averagePurchaseCost && quotePosition < t.gridQuantity {
-			if trailing := t.trailingStop; trailing != nil && trailing.Update(closePrice) {
-				order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
-				if err != nil {
-					log.Error(err)
-				}
-
-				t.order = order
-				t.totalQuantity = 0.0
-				t.totalCost = 0.0
-				t.currentGrid = 0.0
-
-				t.trailingStop.Stop()
+		c1 := df.High.Crossover(df.Metadata["ub"])
+		c2 := closePrice > t.averagePurchaseCost
+		if c1 && c2 {
+			order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
+			if err != nil {
+				log.Error(err)
 			}
+
+			t.order = order
+			t.totalQuantity = 0.0
+			t.totalCost = 0.0
+			t.currentGrid = 0.0
+			t.trailingStop.Stop()
 		}
 
-		if closePrice > t.averagePurchaseCost {
+		if closePrice < t.averagePurchaseCost && quotePosition < t.gridQuantity {
 			if trailing := t.trailingStop; trailing != nil && trailing.Update(closePrice) {
 				order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 				if err != nil {
