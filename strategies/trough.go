@@ -53,8 +53,6 @@ func (t *trough) WarmupPeriod() int {
 }
 
 func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
-	df.Metadata["minPrice"] = indicator.Min(df.Low, t.WarmupPeriod())
-	df.Metadata["maxPrice"] = indicator.Max(df.High, t.WarmupPeriod())
 	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, bbPeriod, deviation, indicator.TypeEMA)
 
 	return []strategy.ChartIndicator{
