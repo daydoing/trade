@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"context"
+	"log"
 
 	"github.com/rodrigo-brito/ninjabot"
 	"github.com/rodrigo-brito/ninjabot/exchange"
+	"github.com/rodrigo-brito/ninjabot/plot"
 	"github.com/rodrigo-brito/ninjabot/storage"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -59,6 +61,15 @@ func backtestingCommand() *cobra.Command {
 				exchange.WithDataFeed(csvFeed),
 			)
 
+			// create a chart  with indicators from the strategy and a custom additional RSI indicator
+			chart, err := plot.NewChart(
+				plot.WithStrategyIndicators(strategy),
+				plot.WithPaperWallet(wallet),
+			)
+			if err != nil {
+				log.Fatal(err)
+			}
+
 			bot, err := ninjabot.NewBot(
 				ctx,
 				settings,
@@ -66,6 +77,8 @@ func backtestingCommand() *cobra.Command {
 				strategy,
 				ninjabot.WithBacktest(wallet),
 				ninjabot.WithStorage(storage),
+				ninjabot.WithCandleSubscription(chart),
+				ninjabot.WithOrderSubscription(chart),
 			)
 			if err != nil {
 				return err
@@ -77,7 +90,7 @@ func backtestingCommand() *cobra.Command {
 
 			bot.Summary()
 
-			return nil
+			return chart.Start()
 		},
 	}
 }

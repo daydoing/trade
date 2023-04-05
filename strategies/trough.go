@@ -16,7 +16,6 @@ import (
 
 const (
 	minQuote = 10.0
-	buySwing = 0.5
 )
 
 type trough struct {
@@ -54,8 +53,52 @@ func (t *trough) WarmupPeriod() int {
 func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 	df.Metadata["minPrice"] = indicator.Min(df.Low, t.WarmupPeriod())
 	df.Metadata["maxPrice"] = indicator.Max(df.High, t.WarmupPeriod())
+	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, 20, 3, indicator.TypeEMA)
 
-	return nil
+	return []strategy.ChartIndicator{
+		{
+			Overlay:   true,
+			GroupName: "UB",
+			Time:      df.Time,
+			Warmup:    t.period,
+			Metrics: []strategy.IndicatorMetric{
+				{
+					Values: df.Metadata["ub"],
+					Name:   "UB",
+					Color:  "orange",
+					Style:  strategy.StyleLine,
+				},
+			},
+		},
+		{
+			Overlay:   true,
+			GroupName: "BOLL",
+			Time:      df.Time,
+			Warmup:    t.period,
+			Metrics: []strategy.IndicatorMetric{
+				{
+					Values: df.Metadata["boll"],
+					Name:   "BOLL",
+					Color:  "red",
+					Style:  strategy.StyleLine,
+				},
+			},
+		},
+		{
+			Overlay:   true,
+			GroupName: "LB",
+			Time:      df.Time,
+			Warmup:    t.period,
+			Metrics: []strategy.IndicatorMetric{
+				{
+					Values: df.Metadata["lb"],
+					Name:   "LB",
+					Color:  "blue",
+					Style:  strategy.StyleLine,
+				},
+			},
+		},
+	}
 }
 
 func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
@@ -72,13 +115,18 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		log.Fatal(err)
 	}
 
-	minPrice := df.Metadata["minPrice"].Last(0)
-	maxPrice := df.Metadata["maxPrice"].Last(0)
-	closePrice := df.Close.Last(0)
+	var (
+		closePrice = df.Close.Last(0)
+	)
 
-	if t.currentGrid == 0 {
+	if t.currentGrid == 0 && quotePosition > minQuote {
 		t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
-		if quotePosition > minQuote && closePrice <= minPrice*(1+buySwing/100) && closePrice <= maxPrice*(1-buySwing/100) {
+
+		//1.最低价格下穿布林线下轨
+		_, _, lb := indicator.BB(df.Close, 20, 3, indicator.TypeEMA)
+		c1 := df.Low.Crossunder(lb)
+
+		if c1 {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 			if err != nil {
 				log.Error(err)
