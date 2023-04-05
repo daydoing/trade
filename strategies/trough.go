@@ -15,7 +15,9 @@ import (
 )
 
 const (
-	minQuote = 10.0
+	minQuote  = 10.0
+	bbPeriod  = 20
+	deviation = 3
 )
 
 type trough struct {
@@ -53,7 +55,7 @@ func (t *trough) WarmupPeriod() int {
 func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 	df.Metadata["minPrice"] = indicator.Min(df.Low, t.WarmupPeriod())
 	df.Metadata["maxPrice"] = indicator.Max(df.High, t.WarmupPeriod())
-	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, 20, 3, indicator.TypeEMA)
+	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, bbPeriod, deviation, indicator.TypeEMA)
 
 	return []strategy.ChartIndicator{
 		{
@@ -123,8 +125,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
 
 		//1.最低价格下穿布林线下轨
-		_, _, lb := indicator.BB(df.Close, 20, 3, indicator.TypeEMA)
-		c1 := df.Low.Crossunder(lb)
+		c1 := df.Low.Crossunder(df.Metadata["lb"])
 
 		if c1 {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
