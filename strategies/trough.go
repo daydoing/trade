@@ -11,7 +11,6 @@ import (
 	"github.com/rodrigo-brito/ninjabot/service"
 	"github.com/rodrigo-brito/ninjabot/strategy"
 	"github.com/rodrigo-brito/ninjabot/tools"
-	"github.com/rodrigo-brito/ninjabot/tools/log"
 
 	ts "github.com/daydoing/trade/service"
 )
@@ -25,6 +24,7 @@ const (
 )
 
 type trough struct {
+	ctx                 *ts.Context
 	period              int
 	currentGrid         int
 	gridNumber          float64
@@ -40,6 +40,7 @@ type trough struct {
 
 func NewTrough(srv *ts.Context) strategy.HighFrequencyStrategy {
 	return &trough{
+		ctx:          srv,
 		timeframe:    srv.Config.Strategy.Timeframe,
 		period:       srv.Config.Strategy.Period,
 		gridNumber:   gridNumber,
@@ -116,7 +117,7 @@ func (t *trough) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) 
 func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
-		log.Fatal(err)
+		t.ctx.Logger.Error(err)
 	}
 
 	var (
@@ -132,7 +133,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		if c1 {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 			if err != nil {
-				log.Error(err)
+				t.ctx.Logger.Error(err)
 			}
 
 			t.order = order
@@ -150,7 +151,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		if quotePosition >= t.gridQuantity && closePrice <= t.order.Price*discount {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 			if err != nil {
-				log.Error(err)
+				t.ctx.Logger.Error(err)
 			}
 
 			t.order = order
@@ -169,7 +170,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		if c1 && c2 {
 			order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 			if err != nil {
-				log.Error(err)
+				t.ctx.Logger.Error(err)
 			}
 
 			t.order = order
@@ -183,7 +184,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			if trailing := t.trailingStop; trailing != nil && trailing.Update(closePrice) {
 				order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 				if err != nil {
-					log.Error(err)
+					t.ctx.Logger.Error(err)
 				}
 
 				t.order = order
