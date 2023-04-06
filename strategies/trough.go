@@ -192,3 +192,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		}
 	}
 }
+
+func init() {
+	RegisterStrategy("trough", NewTrough("15m", 20, 3.0, 3.0))
+}

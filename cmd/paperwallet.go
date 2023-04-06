@@ -31,7 +31,7 @@ func paperwalletCommand() *cobra.Command {
 				Pairs: []string{feedPair},
 			}
 
-			strategy, err := strategies.NewStrategy(strategyName)
+			strategy, err := strategies.Strategy(strategyName)
 			if err != nil {
 				return err
 			}

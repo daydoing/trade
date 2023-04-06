@@ -6,18 +6,16 @@ import (
 	"github.com/rodrigo-brito/ninjabot/strategy"
 )
 
-const (
-	EMA    = "ema"
-	TROUGH = "trough"
-)
+var strategies = map[string]strategy.Strategy{}
 
-func NewStrategy(strategy string) (strategy.Strategy, error) {
-	switch strategy {
-	case EMA:
-		return NewCrossEMA(), nil
-	case TROUGH:
-		return NewTrough("15m", 20, 3.0, 3.0), nil
-	default:
-		return nil, errors.New("unsupported trading strategy")
+func RegisterStrategy(name string, strategy strategy.Strategy) {
+	strategies[name] = strategy
+}
+
+func Strategy(name string) (strategy.Strategy, error) {
+	if v, ok := strategies[name]; ok {
+		return v, nil
 	}
+
+	return nil, errors.New("unsupported trading strategy")
 }

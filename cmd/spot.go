@@ -40,7 +40,7 @@ func spotMarketCommand() *cobra.Command {
 				return err
 			}
 
-			strategy, err := strategies.NewStrategy(strategyName)
+			strategy, err := strategies.Strategy(strategyName)
 			if err != nil {
 				return err
 			}

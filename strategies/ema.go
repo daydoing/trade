@@ -69,3 +69,7 @@ func (e *crossEMA) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 		}
 	}
 }
+
+func init() {
+	RegisterStrategy("ema", NewCrossEMA())
+}
