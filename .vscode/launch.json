@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["backtesting", "-c", "traded.yaml"]
+            "args": ["backtesting"]
         },
         {
             "name": "Paperwallet",
@@ -18,7 +18,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["paperwallet", "-c", "traded.yaml"]
+            "args": ["paperwallet"]
         },
         {
             "name": "Spot",
@@ -26,7 +26,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["spot", "-c", "traded.yaml"]
+            "args": ["spot"]
         },
         {
             "name": "Futures",
@@ -34,7 +34,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["futures", "-c", "traded.yaml"]
+            "args": ["futures"]
         },
     ]
 }

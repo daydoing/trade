@@ -10,8 +10,8 @@ type Context struct {
 	Logger *logrus.Logger
 }
 
-func NewContext(cfgFile string) (*Context, error) {
-	c, err := initViper(cfgFile)
+func NewContext() (*Context, error) {
+	c, err := initViper()
 	if err != nil {
 		return nil, err
 	}

@@ -8,17 +8,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-func initViper(cfgFile string) (c *config.Config, err error) {
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := os.Getwd()
-		cobra.CheckErr(err)
+func initViper() (c *config.Config, err error) {
+	home, err := os.Getwd()
+	cobra.CheckErr(err)
 
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName("traded")
-	}
+	viper.AddConfigPath(home)
+	viper.SetConfigType("yaml")
+	viper.SetConfigName("traded")
 
 	if err := viper.ReadInConfig(); err != nil {
 		panic(err)

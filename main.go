@@ -13,22 +13,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	cfgFile string
-	cmd     = &cobra.Command{
+func main() {
+	cmd := &cobra.Command{
 		Use:   "traded",
 		Short: "Traded is a quantitative trading terminal",
 	}
-)
 
-func main() {
-	srv, err := service.NewContext(cfgFile)
+	srv, err := service.NewContext()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	cmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default ./traded.yaml)")
 	cmd.AddCommand(backtesting.BacktestingCommand(srv))
 	cmd.AddCommand(paperwallet.PaperwalletCommand(srv))
 	cmd.AddCommand(download.DownloadCommand(srv))
