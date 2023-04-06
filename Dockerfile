@@ -15,8 +15,8 @@ FROM docker.io/alpine:latest
 RUN apk --no-cache add ca-certificates
 
 # Copy the binary file to the container
-COPY --from=builder /app/trade /app/trade
-COPY --from=builder /app/traded.yaml /app/traded.yaml
+COPY --from=builder /app/trade /trade
+COPY --from=builder /app/traded.yaml /traded.yaml
 
 # Set the entry command and arguments
 ENTRYPOINT [ "/app/trade" ]
