@@ -16,7 +16,7 @@ func NewContext(cfgFile string) (*Context, error) {
 		return nil, err
 	}
 
-	l, err := initLogger()
+	l, err := initLogger(c.Sentry)
 	if err != nil {
 		return nil, err
 	}

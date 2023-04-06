@@ -6,4 +6,5 @@ type Config struct {
 	Telegram `mapstructure:"telegram"`
 	Feed     `mapstructure:"feed"`
 	Strategy `mapstructure:"strategy"`
+	Sentry   `mapstructure:"sentry"`
 }
