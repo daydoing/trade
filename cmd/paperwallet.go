@@ -7,28 +7,28 @@ import (
 	"github.com/rodrigo-brito/ninjabot/exchange"
 	"github.com/rodrigo-brito/ninjabot/storage"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
+	"github.com/daydoing/trade/service"
 	"github.com/daydoing/trade/strategies"
 )
 
-func paperwalletCommand() *cobra.Command {
+func paperwalletCommand(srv *service.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "paperwallet",
 		Short: "Paperwallet is a simulated run of trading strategies",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
 				ctx          = context.Background()
-				feedPair     = viper.GetString("pair")
-				maker        = viper.GetFloat64("maker")
-				taker        = viper.GetFloat64("taker")
-				assetSymbol  = viper.GetString("symbol")
-				assetAmount  = viper.GetFloat64("amount")
-				strategyName = viper.GetString("strategy")
+				pairs        = srv.Config.System.Pairs
+				maker        = srv.Config.Binance.Maker
+				taker        = srv.Config.Binance.Taker
+				baseCoin     = srv.Config.System.BaseCoin
+				amount       = srv.Config.System.Amount
+				strategyName = srv.Config.Strategy.Name
 			)
 
 			settings := ninjabot.Settings{
-				Pairs: []string{feedPair},
+				Pairs: pairs,
 			}
 
 			strategy, err := strategies.Strategy(strategyName)
@@ -48,9 +48,9 @@ func paperwalletCommand() *cobra.Command {
 
 			wallet := exchange.NewPaperWallet(
 				ctx,
-				assetSymbol,
+				baseCoin,
 				exchange.WithPaperFee(maker, taker),
-				exchange.WithPaperAsset(assetSymbol, assetAmount),
+				exchange.WithPaperAsset(baseCoin, amount),
 				exchange.WithDataFeed(binance),
 			)
 

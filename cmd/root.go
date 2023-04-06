@@ -1,14 +1,14 @@
 package cmd
 
 import (
-	"os"
-
+	"github.com/daydoing/trade/service"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
+	err     error
 	cfgFile string
+	srv     *service.Context
 
 	rootCmd = &cobra.Command{
 		Use:   "traded",
@@ -17,32 +17,20 @@ var (
 )
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(func() {
+		srv, err = service.NewServiceContext(cfgFile)
+		if err != nil {
+			panic(err)
+		}
+	})
 
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default ./traded.yaml)")
 
-	rootCmd.AddCommand(backtestingCommand())
-	rootCmd.AddCommand(paperwalletCommand())
-	rootCmd.AddCommand(downloadCommand())
-	rootCmd.AddCommand(spotMarketCommand())
-	rootCmd.AddCommand(futuresMarketCommand())
-}
-
-func initConfig() {
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := os.Getwd()
-		cobra.CheckErr(err)
-
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName("traded")
-	}
-
-	if err := viper.ReadInConfig(); err != nil {
-		panic(err)
-	}
+	rootCmd.AddCommand(backtestingCommand(srv))
+	rootCmd.AddCommand(paperwalletCommand(srv))
+	rootCmd.AddCommand(downloadCommand(srv))
+	rootCmd.AddCommand(spotMarketCommand(srv))
+	rootCmd.AddCommand(futuresMarketCommand(srv))
 }
 
 // Execute run root command

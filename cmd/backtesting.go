@@ -9,27 +9,29 @@ import (
 	"github.com/rodrigo-brito/ninjabot/plot"
 	"github.com/rodrigo-brito/ninjabot/storage"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
+	"github.com/daydoing/trade/service"
 	"github.com/daydoing/trade/strategies"
 )
 
-func backtestingCommand() *cobra.Command {
+func backtestingCommand(srv *service.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "backtesting",
 		Short: "Backtesting is to backtest the trading strategy",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
 				ctx          = context.Background()
-				feedPair     = viper.GetString("pair")
-				feedFile     = viper.GetString("file")
-				assetSymbol  = viper.GetString("symbol")
-				assetAmount  = viper.GetFloat64("amount")
-				strategyName = viper.GetString("strategy")
+				pairs        = srv.Config.System.Pairs
+				pair         = srv.Config.Feed.Pair
+				file         = srv.Config.Feed.Path
+				timeframe    = srv.Config.Strategy.Timeframe
+				baseCoin     = srv.Config.System.BaseCoin
+				amount       = srv.Config.System.Amount
+				strategyName = srv.Config.Strategy.Name
 			)
 
 			settings := ninjabot.Settings{
-				Pairs: []string{feedPair},
+				Pairs: pairs,
 			}
 
 			strategy, err := strategies.Strategy(strategyName)
@@ -40,9 +42,9 @@ func backtestingCommand() *cobra.Command {
 			csvFeed, err := exchange.NewCSVFeed(
 				strategy.Timeframe(),
 				exchange.PairFeed{
-					Pair:      feedPair,
-					File:      feedFile,
-					Timeframe: strategy.Timeframe(), // specify the dataset timeframe
+					Pair:      pair,
+					File:      file,
+					Timeframe: timeframe,
 				},
 			)
 			if err != nil {
@@ -56,8 +58,8 @@ func backtestingCommand() *cobra.Command {
 
 			wallet := exchange.NewPaperWallet(
 				ctx,
-				assetSymbol,
-				exchange.WithPaperAsset(assetSymbol, assetAmount),
+				baseCoin,
+				exchange.WithPaperAsset(baseCoin, amount),
 				exchange.WithDataFeed(csvFeed),
 			)
 

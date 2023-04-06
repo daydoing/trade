@@ -6,28 +6,28 @@ import (
 	"github.com/rodrigo-brito/ninjabot"
 	"github.com/rodrigo-brito/ninjabot/exchange"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
+	"github.com/daydoing/trade/service"
 	"github.com/daydoing/trade/strategies"
 )
 
-func spotMarketCommand() *cobra.Command {
+func spotMarketCommand(srv *service.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "spot",
 		Short: "Running spot trading strategies",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
 				ctx           = context.Background()
-				feedPair      = viper.GetString("pair")
-				strategyName  = viper.GetString("strategy")
-				apiKey        = viper.GetString("binance.key")
-				secretKey     = viper.GetString("binance.secret")
-				telegramToken = viper.GetString("telegram.token")
-				telegramUser  = viper.GetInt("telegram.uid")
+				pairs         = srv.Config.System.Pairs
+				strategyName  = srv.Config.Strategy.Name
+				binanceKey    = srv.Config.Binance.Key
+				binanceSecret = srv.Config.Binance.Secret
+				telegramToken = srv.Config.Telegram.Token
+				telegramUser  = srv.Config.Telegram.UID
 			)
 
 			settings := ninjabot.Settings{
-				Pairs: []string{feedPair},
+				Pairs: pairs,
 				Telegram: ninjabot.TelegramSettings{
 					Enabled: true,
 					Token:   telegramToken,
@@ -35,7 +35,7 @@ func spotMarketCommand() *cobra.Command {
 				},
 			}
 
-			binance, err := exchange.NewBinance(ctx, exchange.WithBinanceCredentials(apiKey, secretKey))
+			binance, err := exchange.NewBinance(ctx, exchange.WithBinanceCredentials(binanceKey, binanceSecret))
 			if err != nil {
 				return err
 			}

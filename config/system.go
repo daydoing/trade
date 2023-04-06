@@ -2,7 +2,7 @@ package config
 
 type System struct {
 	BaseCoin string
-	Amount   string
+	Amount   float64
 	Strategy string
 	Pairs    []string
 }

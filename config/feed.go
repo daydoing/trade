@@ -3,7 +3,9 @@ package config
 import "time"
 
 type Feed struct {
-	Start time.Time
-	End   time.Time
-	Path  string
+	Futures bool
+	Pair    string
+	Start   time.Time
+	End     time.Time
+	Path    string
 }
