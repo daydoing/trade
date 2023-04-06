@@ -1,4 +1,4 @@
-package cmd
+package paperwallet
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/daydoing/trade/strategies"
 )
 
-func paperwalletCommand(srv *service.Context) *cobra.Command {
+func PaperwalletCommand(srv *service.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "paperwallet",
 		Short: "Paperwallet is a simulated run of trading strategies",

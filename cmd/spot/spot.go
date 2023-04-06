@@ -1,4 +1,4 @@
-package cmd
+package spot
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/daydoing/trade/strategies"
 )
 
-func spotMarketCommand(srv *service.Context) *cobra.Command {
+func SpotMarketCommand(srv *service.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "spot",
 		Short: "Running spot trading strategies",

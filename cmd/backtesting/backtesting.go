@@ -1,4 +1,4 @@
-package cmd
+package backtesting
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"github.com/daydoing/trade/strategies"
 )
 
-func backtestingCommand(srv *service.Context) *cobra.Command {
+func BacktestingCommand(srv *service.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "backtesting",
 		Short: "Backtesting is to backtest the trading strategy",

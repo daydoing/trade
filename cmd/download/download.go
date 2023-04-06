@@ -1,4 +1,4 @@
-package cmd
+package download
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	ts "github.com/daydoing/trade/service"
 )
 
-func downloadCommand(srv *ts.Context) *cobra.Command {
+func DownloadCommand(srv *ts.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "download",
 		Short: "Download historical data for user backtesting",

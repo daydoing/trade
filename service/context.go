@@ -6,7 +6,7 @@ type Context struct {
 	Config *config.Config
 }
 
-func NewServiceContext(cfgFile string) (*Context, error) {
+func NewContext(cfgFile string) (*Context, error) {
 	c, err := initViper(cfgFile)
 	if err != nil {
 		return nil, err

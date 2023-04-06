@@ -1,4 +1,4 @@
-package cmd
+package futures
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/daydoing/trade/strategies"
 )
 
-func futuresMarketCommand(srv *service.Context) *cobra.Command {
+func FuturesMarketCommand(srv *service.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "futures",
 		Short: "Running futures trading strategies",
