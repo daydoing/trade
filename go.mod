@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/rodrigo-brito/ninjabot v0.3.3
+	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.12.0
 )
@@ -39,7 +40,6 @@ require (
 	github.com/rs/zerolog v1.27.0 // indirect
 	github.com/samber/lo v1.38.1 // indirect
 	github.com/schollz/progressbar/v3 v3.13.1 // indirect
-	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
