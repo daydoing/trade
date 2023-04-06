@@ -20,6 +20,10 @@ func initViper(cfgFile string) (c *config.Config, err error) {
 		viper.SetConfigName("traded")
 	}
 
+	if err := viper.ReadInConfig(); err != nil {
+		panic(err)
+	}
+
 	// unmarshal config to struct
 	if err = viper.Unmarshal(&c); err != nil {
 		return nil, err

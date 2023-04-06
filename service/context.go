@@ -12,9 +12,7 @@ func NewServiceContext(cfgFile string) (*Context, error) {
 		return nil, err
 	}
 
-	return &Context{
-		Config: c,
-	}, nil
+	return &Context{Config: c}, nil
 }
 
 func (srv *Context) Gc() {}

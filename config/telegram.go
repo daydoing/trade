@@ -1,6 +1,6 @@
 package config
 
 type Telegram struct {
-	UID   int
-	Token string
+	UID   int    `mapstructure:"uid"`
+	Token string `mapstructure:"token"`
 }

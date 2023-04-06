@@ -3,9 +3,9 @@ package config
 import "time"
 
 type Feed struct {
-	Futures bool
-	Pair    string
-	Start   time.Time
-	End     time.Time
-	Path    string
+	Futures bool      `mapstructure:"futures"`
+	Pair    string    `mapstructure:"pair"`
+	Start   time.Time `mapstructure:"start"`
+	End     time.Time `mapstructure:"end"`
+	Path    string    `mapstructure:"path"`
 }

@@ -1,9 +1,9 @@
 package config
 
 type Config struct {
-	System
-	Binance
-	Telegram
-	Feed
-	Strategy
+	System   `mapstructure:"system"`
+	Binance  `mapstructure:"binance"`
+	Telegram `mapstructure:"telegram"`
+	Feed     `mapstructure:"feed"`
+	Strategy `mapstructure:"strategy"`
 }
