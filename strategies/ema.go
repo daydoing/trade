@@ -7,11 +7,13 @@ import (
 	"github.com/rodrigo-brito/ninjabot/indicator"
 	"github.com/rodrigo-brito/ninjabot/service"
 	"github.com/rodrigo-brito/ninjabot/strategy"
+
+	ts "github.com/daydoing/trade/service"
 )
 
 type crossEMA struct{}
 
-func NewCrossEMA() strategy.Strategy {
+func NewCrossEMA(ctx *ts.Context) strategy.Strategy {
 	return &crossEMA{}
 }
 
@@ -68,8 +70,4 @@ func (e *crossEMA) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 			log.Fatal(err)
 		}
 	}
-}
-
-func init() {
-	RegisterStrategy("ema", NewCrossEMA())
 }

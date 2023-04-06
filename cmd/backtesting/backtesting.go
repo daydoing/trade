@@ -34,7 +34,7 @@ func BacktestingCommand(srv *service.Context) *cobra.Command {
 				Pairs: pairs,
 			}
 
-			strategy, err := strategies.Strategy(strategyName)
+			strategy, err := strategies.Strategy(strategyName, srv)
 			if err != nil {
 				return err
 			}

@@ -12,12 +12,16 @@ import (
 	"github.com/rodrigo-brito/ninjabot/strategy"
 	"github.com/rodrigo-brito/ninjabot/tools"
 	"github.com/rodrigo-brito/ninjabot/tools/log"
+
+	ts "github.com/daydoing/trade/service"
 )
 
 const (
-	minQuote  = 10.0
-	bbPeriod  = 20
-	deviation = 3
+	minQuote   = 10.0
+	bbPeriod   = 20
+	deviation  = 3
+	gridNumber = 3.0
+	drawdown   = 3.0
 )
 
 type trough struct {
@@ -34,10 +38,10 @@ type trough struct {
 	trailingStop        *tools.TrailingStop
 }
 
-func NewTrough(timeframe string, period int, gridNumber float64, drawdown float64) strategy.HighFrequencyStrategy {
+func NewTrough(srv *ts.Context) strategy.HighFrequencyStrategy {
 	return &trough{
-		timeframe:    timeframe,
-		period:       period,
+		timeframe:    srv.Config.Strategy.Timeframe,
+		period:       srv.Config.Strategy.Period,
 		gridNumber:   gridNumber,
 		drawdown:     drawdown,
 		trailingStop: tools.NewTrailingStop(),
@@ -191,8 +195,4 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			}
 		}
 	}
-}
-
-func init() {
-	RegisterStrategy("trough", NewTrough("15m", 20, 3.0, 3.0))
 }

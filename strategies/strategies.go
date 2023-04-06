@@ -4,18 +4,22 @@ import (
 	"errors"
 
 	"github.com/rodrigo-brito/ninjabot/strategy"
+
+	"github.com/daydoing/trade/service"
 )
 
-var strategies = map[string]strategy.Strategy{}
+const (
+	EMA    = "ema"
+	TROUGH = "trough"
+)
 
-func RegisterStrategy(name string, strategy strategy.Strategy) {
-	strategies[name] = strategy
-}
-
-func Strategy(name string) (strategy.Strategy, error) {
-	if v, ok := strategies[name]; ok {
-		return v, nil
+func Strategy(name string, srv *service.Context) (strategy.Strategy, error) {
+	switch name {
+	case EMA:
+		return NewCrossEMA(srv), nil
+	case TROUGH:
+		return NewTrough(srv), nil
+	default:
+		return nil, errors.New("unsupported trading strategy")
 	}
-
-	return nil, errors.New("unsupported trading strategy")
 }
