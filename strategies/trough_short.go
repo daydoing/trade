@@ -163,10 +163,12 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 	}
 
 	if t.totalCost > minQuote {
+		absAssetPosition := math.Abs(assetPosition)
+
 		c1 := df.Low.Crossunder(df.Metadata["lb"])
 		c2 := closePrice < t.averagePurchaseCost
 		if c1 && c2 {
-			order, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, -assetPosition)
+			order, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
 			if err != nil {
 				t.ctx.Logger.Error(err)
 			}
@@ -180,7 +182,7 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 
 		if closePrice > t.averagePurchaseCost && quotePosition < t.gridQuantity {
 			if trailing := t.trailingStop; trailing != nil && trailing.Update(closePrice) {
-				order, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, -assetPosition)
+				order, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
 				if err != nil {
 					t.ctx.Logger.Error(err)
 				}
