@@ -13,26 +13,28 @@ import (
 	"github.com/daydoing/trade/strategies"
 )
 
-func BacktestingCommand(srv context.Context) *cobra.Command {
+func BacktestingCommand(ctx context.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "backtesting",
 		Short: "Backtesting is to backtest the trading strategy",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				pairs        = srv.Config.System.Pairs
-				pair         = srv.Config.Feed.Pair
-				file         = srv.Config.Feed.Path
-				timeframe    = srv.Config.Strategy.Timeframe
-				baseCoin     = srv.Config.System.BaseCoin
-				amount       = srv.Config.System.Amount
-				strategyName = srv.Config.Strategy.Name
+				pairs        = ctx.Config.System.Pairs
+				pair         = ctx.Config.Feed.Pair
+				file         = ctx.Config.Feed.Path
+				timeframe    = ctx.Config.Strategy.Timeframe
+				baseCoin     = ctx.Config.System.BaseCoin
+				amount       = ctx.Config.System.Amount
+				maker        = ctx.Config.Binance.Maker
+				taker        = ctx.Config.Binance.Taker
+				strategyName = ctx.Config.Strategy.Name
 			)
 
 			settings := ninjabot.Settings{
 				Pairs: pairs,
 			}
 
-			strategy, err := strategies.Strategy(strategyName, srv)
+			strategy, err := strategies.Strategy(strategyName, ctx)
 			if err != nil {
 				return err
 			}
@@ -55,8 +57,9 @@ func BacktestingCommand(srv context.Context) *cobra.Command {
 			}
 
 			wallet := exchange.NewPaperWallet(
-				srv,
+				ctx,
 				baseCoin,
+				exchange.WithPaperFee(maker, taker),
 				exchange.WithPaperAsset(baseCoin, amount),
 				exchange.WithDataFeed(csvFeed),
 			)
@@ -71,7 +74,7 @@ func BacktestingCommand(srv context.Context) *cobra.Command {
 			}
 
 			bot, err := ninjabot.NewBot(
-				srv,
+				ctx,
 				settings,
 				wallet,
 				strategy,
@@ -84,7 +87,7 @@ func BacktestingCommand(srv context.Context) *cobra.Command {
 				return err
 			}
 
-			if err := bot.Run(srv); err != nil {
+			if err := bot.Run(ctx); err != nil {
 				return err
 			}
 
