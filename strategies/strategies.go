@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	EMA    = "ema"
-	TROUGH = "trough"
+	EMA          = "ema"
+	TROUGH       = "trough"
+	TROUGH_SHORT = "trough_short"
 )
 
 func Strategy(name string, srv context.Context) (strategy.Strategy, error) {
@@ -19,6 +20,8 @@ func Strategy(name string, srv context.Context) (strategy.Strategy, error) {
 		return NewCrossEMA(srv), nil
 	case TROUGH:
 		return NewTrough(srv), nil
+	case TROUGH_SHORT:
+		return NewTroughShort(srv), nil
 	default:
 		return nil, errors.New("unsupported trading strategy")
 	}

@@ -16,13 +16,13 @@ import (
 )
 
 const (
-	bbPeriod   = 20
-	deviation  = 3
-	gridNumber = 3.0
-	drawdown   = 3.0
+	sbbPeriod   = 20
+	sdeviation  = 3
+	sgridNumber = 3.0
+	sdrawdown   = 3.0
 )
 
-type trough struct {
+type troughShort struct {
 	ctx                 context.Context
 	period              int
 	currentGrid         int
@@ -37,27 +37,27 @@ type trough struct {
 	trailingStop        *tools.TrailingStop
 }
 
-func NewTrough(srv context.Context) strategy.HighFrequencyStrategy {
-	return &trough{
+func NewTroughShort(srv context.Context) strategy.HighFrequencyStrategy {
+	return &troughShort{
 		ctx:          srv,
 		timeframe:    srv.Config.Strategy.Timeframe,
 		period:       srv.Config.Strategy.Period,
-		gridNumber:   gridNumber,
-		drawdown:     drawdown,
+		gridNumber:   sgridNumber,
+		drawdown:     sdrawdown,
 		trailingStop: tools.NewTrailingStop(),
 	}
 }
 
-func (t *trough) Timeframe() string {
+func (t *troughShort) Timeframe() string {
 	return t.timeframe
 }
 
-func (t *trough) WarmupPeriod() int {
+func (t *troughShort) WarmupPeriod() int {
 	return t.period
 }
 
-func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
-	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, bbPeriod, deviation, indicator.TypeEMA)
+func (t *troughShort) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
+	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, sbbPeriod, sdeviation, indicator.TypeEMA)
 
 	return []strategy.ChartIndicator{
 		{
@@ -105,15 +105,15 @@ func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 	}
 }
 
-func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
+func (t *troughShort) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 	t.execStrategy(df, broker)
 }
 
-func (t *trough) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) {
+func (t *troughShort) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) {
 	t.execStrategy(df, broker)
 }
 
-func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
+func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
 		t.ctx.Logger.Error(err)
@@ -127,9 +127,9 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	if t.currentGrid == 0 && quotePosition > minQuote {
 		t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
 
-		c1 := df.Low.Crossunder(df.Metadata["lb"])
+		c1 := df.High.Crossover(df.Metadata["ub"])
 		if c1 {
-			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
+			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.gridQuantity)
 			if err != nil {
 				t.ctx.Logger.Error(err)
 			}
@@ -140,14 +140,14 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
 			t.currentGrid++
 
-			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*(1-t.drawdown/100))
+			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*(1+t.drawdown/100))
 		}
 	} else {
-		discountStr := fmt.Sprintf("%.2f", 1.0-(t.drawdown/100)*float64(t.currentGrid))
+		discountStr := fmt.Sprintf("%.2f", 1.0+(t.drawdown/100)*float64(t.currentGrid))
 		discount, _ := strconv.ParseFloat(discountStr, 64)
 
-		if quotePosition >= t.gridQuantity && closePrice <= t.order.Price*discount {
-			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
+		if quotePosition >= t.gridQuantity && closePrice >= t.order.Price*discount {
+			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.gridQuantity)
 			if err != nil {
 				t.ctx.Logger.Error(err)
 			}
@@ -158,15 +158,15 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
 			t.currentGrid++
 
-			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*(1-t.drawdown/100))
+			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*(1+t.drawdown/100))
 		}
 	}
 
 	if t.totalCost > minQuote {
-		c1 := df.High.Crossover(df.Metadata["ub"])
-		c2 := closePrice > t.averagePurchaseCost
+		c1 := df.Low.Crossunder(df.Metadata["lb"])
+		c2 := closePrice < t.averagePurchaseCost
 		if c1 && c2 {
-			order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
+			order, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, -assetPosition)
 			if err != nil {
 				t.ctx.Logger.Error(err)
 			}
@@ -178,9 +178,9 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.trailingStop.Stop()
 		}
 
-		if closePrice < t.averagePurchaseCost && quotePosition < t.gridQuantity {
+		if closePrice > t.averagePurchaseCost && quotePosition < t.gridQuantity {
 			if trailing := t.trailingStop; trailing != nil && trailing.Update(closePrice) {
-				order, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
+				order, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, -assetPosition)
 				if err != nil {
 					t.ctx.Logger.Error(err)
 				}
@@ -189,7 +189,6 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 				t.totalQuantity = 0.0
 				t.totalCost = 0.0
 				t.currentGrid = 0.0
-
 				t.trailingStop.Stop()
 			}
 		}
