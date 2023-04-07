@@ -1,7 +1,6 @@
 package backtesting
 
 import (
-	"context"
 	"log"
 
 	"github.com/rodrigo-brito/ninjabot"
@@ -10,17 +9,16 @@ import (
 	"github.com/rodrigo-brito/ninjabot/storage"
 	"github.com/spf13/cobra"
 
-	"github.com/daydoing/trade/service"
+	"github.com/daydoing/trade/context"
 	"github.com/daydoing/trade/strategies"
 )
 
-func BacktestingCommand(srv *service.Context) *cobra.Command {
+func BacktestingCommand(srv context.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "backtesting",
 		Short: "Backtesting is to backtest the trading strategy",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				ctx          = context.Background()
 				pairs        = srv.Config.System.Pairs
 				pair         = srv.Config.Feed.Pair
 				file         = srv.Config.Feed.Path
@@ -57,7 +55,7 @@ func BacktestingCommand(srv *service.Context) *cobra.Command {
 			}
 
 			wallet := exchange.NewPaperWallet(
-				ctx,
+				srv,
 				baseCoin,
 				exchange.WithPaperAsset(baseCoin, amount),
 				exchange.WithDataFeed(csvFeed),
@@ -73,7 +71,7 @@ func BacktestingCommand(srv *service.Context) *cobra.Command {
 			}
 
 			bot, err := ninjabot.NewBot(
-				ctx,
+				srv,
 				settings,
 				wallet,
 				strategy,
@@ -86,7 +84,7 @@ func BacktestingCommand(srv *service.Context) *cobra.Command {
 				return err
 			}
 
-			if err := bot.Run(ctx); err != nil {
+			if err := bot.Run(srv); err != nil {
 				return err
 			}
 

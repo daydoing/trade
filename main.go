@@ -9,7 +9,7 @@ import (
 	"github.com/daydoing/trade/cmd/futures"
 	"github.com/daydoing/trade/cmd/paperwallet"
 	"github.com/daydoing/trade/cmd/spot"
-	"github.com/daydoing/trade/service"
+	"github.com/daydoing/trade/context"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +19,7 @@ func main() {
 		Short: "Traded is a quantitative trading terminal",
 	}
 
-	srv, err := service.NewContext()
+	srv, err := context.NewContext()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

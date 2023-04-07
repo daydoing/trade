@@ -1,37 +1,34 @@
 package paperwallet
 
 import (
-	"context"
-
 	"github.com/rodrigo-brito/ninjabot"
 	"github.com/rodrigo-brito/ninjabot/exchange"
 	"github.com/rodrigo-brito/ninjabot/storage"
 	"github.com/spf13/cobra"
 
-	"github.com/daydoing/trade/service"
+	"github.com/daydoing/trade/context"
 	"github.com/daydoing/trade/strategies"
 )
 
-func PaperwalletCommand(srv *service.Context) *cobra.Command {
+func PaperwalletCommand(ctx context.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "paperwallet",
 		Short: "Paperwallet is a simulated run of trading strategies",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				ctx          = context.Background()
-				pairs        = srv.Config.System.Pairs
-				maker        = srv.Config.Binance.Maker
-				taker        = srv.Config.Binance.Taker
-				baseCoin     = srv.Config.System.BaseCoin
-				amount       = srv.Config.System.Amount
-				strategyName = srv.Config.Strategy.Name
+				pairs        = ctx.Config.System.Pairs
+				maker        = ctx.Config.Binance.Maker
+				taker        = ctx.Config.Binance.Taker
+				baseCoin     = ctx.Config.System.BaseCoin
+				amount       = ctx.Config.System.Amount
+				strategyName = ctx.Config.Strategy.Name
 			)
 
 			settings := ninjabot.Settings{
 				Pairs: pairs,
 			}
 
-			strategy, err := strategies.Strategy(strategyName, srv)
+			strategy, err := strategies.Strategy(strategyName, ctx)
 			if err != nil {
 				return err
 			}

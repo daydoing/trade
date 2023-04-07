@@ -5,7 +5,7 @@ import (
 
 	"github.com/rodrigo-brito/ninjabot/strategy"
 
-	"github.com/daydoing/trade/service"
+	"github.com/daydoing/trade/context"
 )
 
 const (
@@ -13,7 +13,7 @@ const (
 	TROUGH = "trough"
 )
 
-func Strategy(name string, srv *service.Context) (strategy.Strategy, error) {
+func Strategy(name string, srv context.Context) (strategy.Strategy, error) {
 	switch name {
 	case EMA:
 		return NewCrossEMA(srv), nil

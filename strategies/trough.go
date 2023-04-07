@@ -12,7 +12,7 @@ import (
 	"github.com/rodrigo-brito/ninjabot/strategy"
 	"github.com/rodrigo-brito/ninjabot/tools"
 
-	ts "github.com/daydoing/trade/service"
+	"github.com/daydoing/trade/context"
 )
 
 const (
@@ -24,7 +24,7 @@ const (
 )
 
 type trough struct {
-	ctx                 *ts.Context
+	ctx                 context.Context
 	period              int
 	currentGrid         int
 	gridNumber          float64
@@ -38,7 +38,7 @@ type trough struct {
 	trailingStop        *tools.TrailingStop
 }
 
-func NewTrough(srv *ts.Context) strategy.HighFrequencyStrategy {
+func NewTrough(srv context.Context) strategy.HighFrequencyStrategy {
 	return &trough{
 		ctx:          srv,
 		timeframe:    srv.Config.Strategy.Timeframe,

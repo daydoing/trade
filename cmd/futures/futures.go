@@ -1,31 +1,28 @@
 package futures
 
 import (
-	"context"
-
 	"github.com/rodrigo-brito/ninjabot"
 	"github.com/rodrigo-brito/ninjabot/exchange"
 	"github.com/spf13/cobra"
 
-	"github.com/daydoing/trade/service"
+	"github.com/daydoing/trade/context"
 	"github.com/daydoing/trade/strategies"
 )
 
-func FuturesMarketCommand(srv *service.Context) *cobra.Command {
+func FuturesMarketCommand(ctx context.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "futures",
 		Short: "Running futures trading strategies",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				ctx             = context.Background()
-				pairs           = srv.Config.System.Pairs
-				pair            = srv.Config.Feed.Pair
-				strategyName    = srv.Config.Strategy.Name
-				binanceKey      = srv.Config.Binance.Key
-				binanceSecret   = srv.Config.Binance.Secret
-				binanceLeverage = srv.Config.Binance.Leverage
-				telegramToken   = srv.Config.Telegram.Token
-				telegramUser    = srv.Config.Telegram.UID
+				pairs           = ctx.Config.System.Pairs
+				pair            = ctx.Config.Feed.Pair
+				strategyName    = ctx.Config.Strategy.Name
+				binanceKey      = ctx.Config.Binance.Key
+				binanceSecret   = ctx.Config.Binance.Secret
+				binanceLeverage = ctx.Config.Binance.Leverage
+				telegramToken   = ctx.Config.Telegram.Token
+				telegramUser    = ctx.Config.Telegram.UID
 			)
 
 			settings := ninjabot.Settings{
@@ -46,7 +43,7 @@ func FuturesMarketCommand(srv *service.Context) *cobra.Command {
 				return err
 			}
 
-			strategy, err := strategies.Strategy(strategyName, srv)
+			strategy, err := strategies.Strategy(strategyName, ctx)
 			if err != nil {
 				return err
 			}

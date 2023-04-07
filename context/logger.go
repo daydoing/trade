@@ -1,4 +1,4 @@
-package service
+package context
 
 import (
 	"github.com/evalphobia/logrus_sentry"

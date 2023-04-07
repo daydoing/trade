@@ -6,14 +6,14 @@ import (
 	"github.com/rodrigo-brito/ninjabot/service"
 	"github.com/rodrigo-brito/ninjabot/strategy"
 
-	ts "github.com/daydoing/trade/service"
+	"github.com/daydoing/trade/context"
 )
 
 type crossEMA struct {
-	ctx *ts.Context
+	ctx context.Context
 }
 
-func NewCrossEMA(ctx *ts.Context) strategy.Strategy {
+func NewCrossEMA(ctx context.Context) strategy.Strategy {
 	return &crossEMA{ctx: ctx}
 }
 

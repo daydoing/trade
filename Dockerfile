@@ -19,4 +19,4 @@ COPY --from=builder /app/trade /trade
 COPY --from=builder /app/traded.yaml /traded.yaml
 
 # Set the entry command and arguments
-ENTRYPOINT [ "/app/trade" ]
+ENTRYPOINT [ "/trade" ]

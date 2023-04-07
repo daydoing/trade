@@ -1,29 +1,26 @@
 package download
 
 import (
-	"context"
-
 	"github.com/rodrigo-brito/ninjabot/download"
 	"github.com/rodrigo-brito/ninjabot/exchange"
 	"github.com/rodrigo-brito/ninjabot/service"
 	"github.com/spf13/cobra"
 
-	ts "github.com/daydoing/trade/service"
+	"github.com/daydoing/trade/context"
 )
 
-func DownloadCommand(srv *ts.Context) *cobra.Command {
+func DownloadCommand(ctx context.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:   "download",
 		Short: "Download historical data for user backtesting",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				ctx       = context.Background()
-				futures   = srv.Config.Feed.Futures
-				start     = srv.Config.Feed.Start
-				end       = srv.Config.Feed.End
-				timeframe = srv.Config.Strategy.Timeframe
-				pair      = srv.Config.Feed.Pair
-				output    = srv.Config.Feed.Path
+				futures   = ctx.Config.Feed.Futures
+				start     = ctx.Config.Feed.Start
+				end       = ctx.Config.Feed.End
+				timeframe = ctx.Config.Strategy.Timeframe
+				pair      = ctx.Config.Feed.Pair
+				output    = ctx.Config.Feed.Path
 			)
 
 			var (
