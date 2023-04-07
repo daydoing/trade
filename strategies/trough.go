@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	minQuote   = 10.0
 	bbPeriod   = 20
 	deviation  = 3
 	gridNumber = 3.0
@@ -121,6 +120,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	}
 
 	var (
+		minQuote   = t.ctx.Config.MinQuote
 		closePrice = df.Close.Last(0)
 	)
 
