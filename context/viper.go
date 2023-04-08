@@ -9,9 +9,7 @@ import (
 )
 
 func initViper() (c *config.Config, err error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, err
-	}
+	godotenv.Load()
 
 	viper.SetEnvPrefix("traded")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
