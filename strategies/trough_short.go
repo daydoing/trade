@@ -1,9 +1,7 @@
 package strategies
 
 import (
-	"fmt"
 	"math"
-	"strconv"
 
 	"github.com/rodrigo-brito/ninjabot"
 	"github.com/rodrigo-brito/ninjabot/indicator"
@@ -143,10 +141,7 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*(1+t.drawdown/100))
 		}
 	} else {
-		discountStr := fmt.Sprintf("%.2f", 1.0+(t.drawdown/100)*float64(t.currentGrid))
-		discount, _ := strconv.ParseFloat(discountStr, 64)
-
-		if quotePosition >= t.gridQuantity && closePrice >= t.order.Price*discount {
+		if quotePosition >= t.gridQuantity && closePrice >= t.order.Price*(1.0+t.drawdown/100) {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.gridQuantity)
 			if err != nil {
 				t.ctx.Logger.Error(err)
