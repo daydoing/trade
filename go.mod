@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/evalphobia/logrus_sentry v0.8.2
+	github.com/joho/godotenv v1.5.1
 	github.com/rodrigo-brito/ninjabot v0.3.3
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1

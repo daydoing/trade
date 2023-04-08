@@ -1,6 +1,8 @@
 package download
 
 import (
+	"time"
+
 	"github.com/rodrigo-brito/ninjabot/download"
 	"github.com/rodrigo-brito/ninjabot/exchange"
 	"github.com/rodrigo-brito/ninjabot/service"
@@ -42,9 +44,19 @@ func DownloadCommand(ctx context.Context) *cobra.Command {
 				}
 			}
 
+			startTime, err := time.Parse(time.RFC3339, start)
+			if err != nil {
+				return err
+			}
+
+			endTime, err := time.Parse(time.RFC3339, end)
+			if err != nil {
+				return err
+			}
+
 			var options []download.Option
-			if !start.IsZero() && !end.IsZero() {
-				options = append(options, download.WithInterval(start, end))
+			if !startTime.IsZero() && !endTime.IsZero() {
+				options = append(options, download.WithInterval(startTime, endTime))
 			}
 
 			return download.NewDownloader(exc).Download(ctx, pair, timeframe, output, options...)
