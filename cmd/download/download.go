@@ -44,12 +44,12 @@ func DownloadCommand(ctx context.Context) *cobra.Command {
 				}
 			}
 
-			startTime, err := time.Parse(time.RFC3339, start)
+			startTime, err := time.Parse("2006-01-02 15:04:05", start)
 			if err != nil {
 				return err
 			}
 
-			endTime, err := time.Parse(time.RFC3339, end)
+			endTime, err := time.Parse("2006-01-02 15:04:05", end)
 			if err != nil {
 				return err
 			}
