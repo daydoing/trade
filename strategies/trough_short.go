@@ -161,8 +161,8 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 		absAssetPosition := math.Abs(assetPosition)
 
 		c1 := df.Low.Crossunder(df.Metadata["lb"])
-		c2 := closePrice < t.averagePurchaseCost
-		if c1 && c2 {
+		c2 := closePrice < t.averagePurchaseCost*(1-t.drawdown/100)
+		if c1 || c2 {
 			order, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
 			if err != nil {
 				t.ctx.Logger.Error(err)
