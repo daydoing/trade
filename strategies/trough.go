@@ -153,7 +153,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.totalQuantity = t.totalQuantity + t.order.Quantity
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
-			t.stopLosePoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*3
+			t.stopLosePoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*2.5
 			t.takeProfitPoint = t.averagePurchaseCost + df.Metadata["atr"].Last(0)*3.5
 			t.currentGrid++
 
