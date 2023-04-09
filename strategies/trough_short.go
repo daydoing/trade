@@ -139,6 +139,8 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 			t.stopLosePoint = t.averagePurchaseCost + df.Metadata["atr"].Last(0)*2.5
 			t.takeProfitPoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*3.5
 			t.currentGrid++
+
+			t.trailingStop.Start(t.averagePurchaseCost, t.stopLosePoint)
 		}
 	} else {
 		if quotePosition >= t.gridQuantity && closePrice >= t.stopLosePoint {
