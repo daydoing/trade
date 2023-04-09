@@ -124,25 +124,27 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 		closePrice = df.Close.Last(0)
 	)
 
-	if t.currentGrid == 0 && quotePosition > minQuote {
-		t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
+	if t.currentGrid == 0 {
+		if quotePosition > minQuote {
+			t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
 
-		c1 := df.High.Crossover(df.Metadata["ub"])
-		if c1 {
-			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.gridQuantity)
-			if err != nil {
-				t.ctx.Logger.Error(err)
+			c1 := df.High.Crossover(df.Metadata["ub"])
+			if c1 {
+				order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.gridQuantity)
+				if err != nil {
+					t.ctx.Logger.Error(err)
+				}
+
+				t.order = order
+				t.totalQuantity = t.totalQuantity + t.order.Quantity
+				t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
+				t.averagePurchaseCost = t.totalCost / t.totalQuantity
+				t.stopLosePoint = t.averagePurchaseCost + df.Metadata["atr"].Last(0)*supPercent
+				t.takeProfitPoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*sdownPercent
+				t.currentGrid++
+
+				t.trailingStop.Start(t.averagePurchaseCost, t.stopLosePoint)
 			}
-
-			t.order = order
-			t.totalQuantity = t.totalQuantity + t.order.Quantity
-			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
-			t.averagePurchaseCost = t.totalCost / t.totalQuantity
-			t.stopLosePoint = t.averagePurchaseCost + df.Metadata["atr"].Last(0)*supPercent
-			t.takeProfitPoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*sdownPercent
-			t.currentGrid++
-
-			t.trailingStop.Start(t.averagePurchaseCost, t.stopLosePoint)
 		}
 	} else {
 		if quotePosition >= t.gridQuantity && closePrice >= t.stopLosePoint {
