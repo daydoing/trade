@@ -14,9 +14,11 @@ import (
 )
 
 const (
-	sbbPeriod   = 20
-	sdeviation  = 3
-	sgridNumber = 3.0
+	sbbPeriod    = 20
+	sdeviation   = 3
+	sgridNumber  = 3.0
+	supPercent   = 2.5
+	sdownPercent = 3.5
 )
 
 type troughShort struct {
@@ -136,8 +138,8 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 			t.totalQuantity = t.totalQuantity + t.order.Quantity
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
-			t.stopLosePoint = t.averagePurchaseCost + df.Metadata["atr"].Last(0)*2.5
-			t.takeProfitPoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*3.5
+			t.stopLosePoint = t.averagePurchaseCost + df.Metadata["atr"].Last(0)*supPercent
+			t.takeProfitPoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*sdownPercent
 			t.currentGrid++
 
 			t.trailingStop.Start(t.averagePurchaseCost, t.stopLosePoint)
@@ -153,8 +155,8 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 			t.totalQuantity = t.totalQuantity + t.order.Quantity
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
-			t.stopLosePoint = t.averagePurchaseCost + df.Metadata["atr"].Last(0)*2.5
-			t.takeProfitPoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*3.5
+			t.stopLosePoint = t.averagePurchaseCost + df.Metadata["atr"].Last(0)*supPercent
+			t.takeProfitPoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*sdownPercent
 			t.currentGrid++
 
 			t.trailingStop.Start(t.averagePurchaseCost, t.stopLosePoint)
