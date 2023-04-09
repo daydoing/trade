@@ -146,7 +146,6 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 				t.trailingStop.Start(t.averagePurchaseCost, t.stopLosePoint)
 			}
 		}
-
 	} else {
 		if quotePosition >= t.gridQuantity && closePrice <= t.stopLosePoint {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
