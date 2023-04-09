@@ -17,7 +17,6 @@ const (
 	sbbPeriod   = 20
 	sdeviation  = 3
 	sgridNumber = 3.0
-	sdrawdown   = 3.0
 )
 
 type troughShort struct {
@@ -29,7 +28,8 @@ type troughShort struct {
 	totalCost           float64
 	totalQuantity       float64
 	averagePurchaseCost float64
-	drawdown            float64
+	stopLosePoint       float64
+	takeProfitPoint     float64
 	timeframe           string
 	order               model.Order
 	trailingStop        *tools.TrailingStop
@@ -41,7 +41,6 @@ func NewTroughShort(srv context.Context) strategy.HighFrequencyStrategy {
 		timeframe:    srv.Config.Strategy.Timeframe,
 		period:       srv.Config.Strategy.Period,
 		gridNumber:   sgridNumber,
-		drawdown:     sdrawdown,
 		trailingStop: tools.NewTrailingStop(),
 	}
 }
@@ -55,6 +54,7 @@ func (t *troughShort) WarmupPeriod() int {
 }
 
 func (t *troughShort) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
+	df.Metadata["atr"] = indicator.ATR(df.High, df.Low, df.Close, bbPeriod)
 	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, sbbPeriod, sdeviation, indicator.TypeEMA)
 
 	return []strategy.ChartIndicator{
@@ -136,12 +136,12 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 			t.totalQuantity = t.totalQuantity + t.order.Quantity
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
+			t.stopLosePoint = t.averagePurchaseCost + df.Metadata["atr"].Last(0)*2.5
+			t.takeProfitPoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*3.5
 			t.currentGrid++
-
-			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*(1+t.drawdown/100))
 		}
 	} else {
-		if quotePosition >= t.gridQuantity && closePrice >= t.order.Price*(1.0+t.drawdown/100) {
+		if quotePosition >= t.gridQuantity && closePrice >= t.stopLosePoint {
 			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.gridQuantity)
 			if err != nil {
 				t.ctx.Logger.Error(err)
@@ -151,9 +151,11 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 			t.totalQuantity = t.totalQuantity + t.order.Quantity
 			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
 			t.averagePurchaseCost = t.totalCost / t.totalQuantity
+			t.stopLosePoint = t.averagePurchaseCost + df.Metadata["atr"].Last(0)*2.5
+			t.takeProfitPoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*3.5
 			t.currentGrid++
 
-			t.trailingStop.Start(t.averagePurchaseCost, t.averagePurchaseCost*(1+t.drawdown/100))
+			t.trailingStop.Start(t.averagePurchaseCost, t.stopLosePoint)
 		}
 	}
 
@@ -161,7 +163,7 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 		absAssetPosition := math.Abs(assetPosition)
 
 		c1 := df.Low.Crossunder(df.Metadata["lb"])
-		c2 := closePrice < t.averagePurchaseCost*(1-t.drawdown/100)
+		c2 := closePrice <= t.takeProfitPoint
 		if c1 || c2 {
 			order, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
 			if err != nil {
