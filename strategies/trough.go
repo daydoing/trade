@@ -105,15 +105,9 @@ func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 	}
 }
 
-func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
-	t.execStrategy(df, broker)
-}
+func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {}
 
 func (t *trough) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) {
-	t.execStrategy(df, broker)
-}
-
-func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
 		t.ctx.Logger.Error(err)
