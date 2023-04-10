@@ -105,6 +105,7 @@ func (t *troughShort) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicat
 	}
 }
 
+// source data's timeframe must less then t.timeframe, otherwise it's will be panic for HighFrequencyStrategy
 func (t *troughShort) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {}
 
 func (t *troughShort) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) {
