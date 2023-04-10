@@ -30,6 +30,7 @@ func initViper() (c *config.Config, err error) {
 
 	viper.BindEnv("feed.futures")
 	viper.BindEnv("feed.pair")
+	viper.BindEnv("feed.timeframe")
 	viper.BindEnv("feed.start")
 	viper.BindEnv("feed.end")
 	viper.BindEnv("feed.path")

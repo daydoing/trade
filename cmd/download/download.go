@@ -20,7 +20,7 @@ func DownloadCommand(ctx context.Context) *cobra.Command {
 				futures   = ctx.Config.Feed.Futures
 				start     = ctx.Config.Feed.Start
 				end       = ctx.Config.Feed.End
-				timeframe = ctx.Config.Strategy.Timeframe
+				timeframe = ctx.Config.Feed.Timeframe
 				pair      = ctx.Config.Feed.Pair
 				output    = ctx.Config.Feed.Path
 			)

@@ -20,11 +20,11 @@ func BacktestingCommand(ctx context.Context) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
 				pairs        = ctx.Config.System.Pairs
-				pair         = ctx.Config.Feed.Pair
-				file         = ctx.Config.Feed.Path
-				timeframe    = ctx.Config.Strategy.Timeframe
 				baseCoin     = ctx.Config.System.BaseCoin
 				amount       = ctx.Config.System.Amount
+				pair         = ctx.Config.Feed.Pair
+				file         = ctx.Config.Feed.Path
+				timeframe    = ctx.Config.Feed.Timeframe
 				maker        = ctx.Config.Binance.Maker
 				taker        = ctx.Config.Binance.Taker
 				strategyName = ctx.Config.Strategy.Name
