@@ -69,7 +69,7 @@ func (t *troughShort) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicat
 				{
 					Values: df.Metadata["ub"],
 					Name:   "UB",
-					Color:  "orange",
+					Color:  "blue",
 					Style:  strategy.StyleLine,
 				},
 			},
