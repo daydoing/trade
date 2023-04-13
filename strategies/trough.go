@@ -52,6 +52,7 @@ func (t *trough) WarmupPeriod() int {
 
 func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 	df.Metadata["atr"] = indicator.ATR(df.High, df.Low, df.Close, bbPeriod)
+	df.Metadata["rsi"] = indicator.RSI(df.Close, bbPeriod)
 	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, bbPeriod, deviation, indicator.TypeEMA)
 
 	return []strategy.ChartIndicator{
@@ -120,21 +121,26 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		close    = df.Close.Last(0)
 		low      = df.Low.Last(0)
 		high     = df.High.Last(0)
+		atr      = df.Metadata["atr"]
+		rsi      = df.Metadata["rsi"]
+		lb       = df.Metadata["lb"]
+		ub       = df.Metadata["ub"]
 	)
 
 	if t.currentGrid == 0 {
 		if quotePosition > minQuote {
 			t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
 
-			c1 := df.Low.Crossunder(df.Metadata["lb"])
-			if c1 {
+			c1 := df.Low.Crossunder(lb)
+			c2 := rsi.Last(0) <= 20.0
+			if c1 || c2 {
 				_, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 				if err != nil {
 					t.ctx.Logger.Error(err)
 				}
 
-				t.stopLosePoint = low - df.Metadata["atr"].Last(0)*downPercent
-				t.takeProfitPoint = high + df.Metadata["atr"].Last(0)*upPercent
+				t.stopLosePoint = low - atr.Last(0)*downPercent
+				t.takeProfitPoint = high + atr.Last(0)*upPercent
 				t.currentGrid++
 
 				t.trailingStop.Start(low, t.stopLosePoint)
@@ -147,8 +153,8 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 				t.ctx.Logger.Error(err)
 			}
 
-			t.stopLosePoint = low - df.Metadata["atr"].Last(0)*downPercent
-			t.takeProfitPoint = high + df.Metadata["atr"].Last(0)*upPercent
+			t.stopLosePoint = low - atr.Last(0)*downPercent
+			t.takeProfitPoint = high + atr.Last(0)*upPercent
 			t.currentGrid++
 
 			t.trailingStop.Start(low, t.stopLosePoint)
@@ -156,9 +162,10 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	}
 
 	if assetPosition > minQuote {
-		c1 := df.High.Crossover(df.Metadata["ub"])
+		c1 := df.High.Crossover(ub)
 		c2 := high >= t.takeProfitPoint
-		if c1 || c2 {
+		c3 := rsi.Last(0) >= 80.0
+		if c1 || c2 || c3 {
 			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 			if err != nil {
 				t.ctx.Logger.Error(err)
