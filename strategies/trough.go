@@ -157,7 +157,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 
 	if assetPosition > minQuote {
 		c1 := df.High.Crossover(df.Metadata["ub"])
-		c2 := close >= t.takeProfitPoint
+		c2 := high >= t.takeProfitPoint
 		if c1 || c2 {
 			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 			if err != nil {
