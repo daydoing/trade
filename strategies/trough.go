@@ -118,7 +118,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	var (
 		minQuote = t.ctx.Config.MinQuote
 		close    = df.Close.Last(0)
-		lower    = df.Low.Last(0)
+		low      = df.Low.Last(0)
 		high     = df.High.Last(0)
 	)
 
@@ -133,11 +133,11 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 					t.ctx.Logger.Error(err)
 				}
 
-				t.stopLosePoint = lower - df.Metadata["atr"].Last(0)*downPercent
+				t.stopLosePoint = low - df.Metadata["atr"].Last(0)*downPercent
 				t.takeProfitPoint = high + df.Metadata["atr"].Last(0)*upPercent
 				t.currentGrid++
 
-				t.trailingStop.Start(lower, t.stopLosePoint)
+				t.trailingStop.Start(low, t.stopLosePoint)
 			}
 		}
 	} else {
@@ -147,11 +147,11 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 				t.ctx.Logger.Error(err)
 			}
 
-			t.stopLosePoint = lower - df.Metadata["atr"].Last(0)*downPercent
+			t.stopLosePoint = low - df.Metadata["atr"].Last(0)*downPercent
 			t.takeProfitPoint = high + df.Metadata["atr"].Last(0)*upPercent
 			t.currentGrid++
 
-			t.trailingStop.Start(lower, t.stopLosePoint)
+			t.trailingStop.Start(low, t.stopLosePoint)
 		}
 	}
 
@@ -168,8 +168,8 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.trailingStop.Stop()
 		}
 
-		if lower < t.stopLosePoint && quotePosition < t.gridQuantity {
-			if trailing := t.trailingStop; trailing != nil && trailing.Update(lower) {
+		if low < t.stopLosePoint && quotePosition < t.gridQuantity {
+			if trailing := t.trailingStop; trailing != nil && trailing.Update(low) {
 				_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 				if err != nil {
 					t.ctx.Logger.Error(err)
