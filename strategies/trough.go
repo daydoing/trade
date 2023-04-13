@@ -122,7 +122,6 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		low      = df.Low.Last(0)
 		high     = df.High.Last(0)
 		atr      = df.Metadata["atr"]
-		rsi      = df.Metadata["rsi"]
 		lb       = df.Metadata["lb"]
 		ub       = df.Metadata["ub"]
 	)
@@ -132,8 +131,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
 
 			c1 := df.Low.Crossunder(lb)
-			c2 := rsi.Last(0) <= 20.0
-			if c1 || c2 {
+			if c1 {
 				_, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 				if err != nil {
 					t.ctx.Logger.Error(err)
@@ -164,8 +162,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	if assetPosition > minQuote {
 		c1 := df.High.Crossover(ub)
 		c2 := high >= t.takeProfitPoint
-		c3 := rsi.Last(0) >= 80.0
-		if c1 || c2 || c3 {
+		if c1 || c2 {
 			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 			if err != nil {
 				t.ctx.Logger.Error(err)
