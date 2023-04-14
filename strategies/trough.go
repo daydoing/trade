@@ -45,9 +45,7 @@ func (t *trough) WarmupPeriod() int {
 }
 
 func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
-	df.Metadata["ema"] = indicator.EMA(df.Close, bbPeriod)
 	df.Metadata["atr"] = indicator.ATR(df.High, df.Low, df.Close, bbPeriod/2)
-	df.Metadata["rsi"] = indicator.RSI(df.Close, bbPeriod)
 	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, bbPeriod, deviation, indicator.TypeEMA)
 
 	return []strategy.ChartIndicator{
@@ -123,8 +121,8 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 				}
 
 				t.currentGrid++
-				t.stopLosePoint = df.Metadata["ema"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+1)
-				t.takeProfitPoint = df.Metadata["ema"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+1)
+				t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+1)
+				t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+1)
 				t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
 			}
 		}
@@ -136,8 +134,8 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			}
 
 			t.currentGrid++
-			t.stopLosePoint = df.Metadata["ema"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+1)
-			t.takeProfitPoint = df.Metadata["ema"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+1)
+			t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+1)
+			t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+1)
 			t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
 		}
 	}
