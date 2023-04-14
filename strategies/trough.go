@@ -21,7 +21,7 @@ const (
 type trough struct {
 	ctx             context.Context
 	currentGrid     int
-	gridNumber      float64
+	gridNumber      int
 	gridQuantity    float64
 	stopLosePoint   float64
 	takeProfitPoint float64
@@ -113,7 +113,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 
 	if t.currentGrid == 0 {
 		if quotePosition > t.ctx.Config.MinQuote {
-			t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
+			t.gridQuantity = math.Floor(quotePosition / float64(t.gridNumber))
 
 			c1 := df.Low.Crossunder(df.Metadata["lb"])
 			if c1 {
