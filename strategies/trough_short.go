@@ -5,7 +5,6 @@ import (
 
 	"github.com/rodrigo-brito/ninjabot"
 	"github.com/rodrigo-brito/ninjabot/indicator"
-	"github.com/rodrigo-brito/ninjabot/model"
 	"github.com/rodrigo-brito/ninjabot/service"
 	"github.com/rodrigo-brito/ninjabot/strategy"
 	"github.com/rodrigo-brito/ninjabot/tools"
@@ -14,27 +13,21 @@ import (
 )
 
 const (
-	sbbPeriod    = 20
-	sdeviation   = 3
-	sgridNumber  = 3.0
-	supPercent   = 2.5
-	sdownPercent = 3.5
+	sbbPeriod   = 20
+	sdeviation  = 3
+	sgridNumber = 3
 )
 
 type troughShort struct {
-	ctx                 context.Context
-	period              int
-	currentGrid         int
-	gridNumber          float64
-	gridQuantity        float64
-	totalCost           float64
-	totalQuantity       float64
-	averagePurchaseCost float64
-	stopLosePoint       float64
-	takeProfitPoint     float64
-	timeframe           string
-	order               model.Order
-	trailingStop        *tools.TrailingStop
+	ctx             context.Context
+	period          int
+	currentGrid     int
+	gridNumber      float64
+	gridQuantity    float64
+	stopLosePoint   float64
+	takeProfitPoint float64
+	timeframe       string
+	trailingStop    *tools.TrailingStop
 }
 
 func NewTroughShort(srv context.Context) strategy.HighFrequencyStrategy {
@@ -56,7 +49,7 @@ func (t *troughShort) WarmupPeriod() int {
 }
 
 func (t *troughShort) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
-	df.Metadata["atr"] = indicator.ATR(df.High, df.Low, df.Close, bbPeriod)
+	df.Metadata["atr"] = indicator.ATR(df.High, df.Low, df.Close, bbPeriod/2)
 	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, sbbPeriod, sdeviation, indicator.TypeEMA)
 
 	return []strategy.ChartIndicator{
@@ -120,80 +113,60 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 		t.ctx.Logger.Error(err)
 	}
 
-	var (
-		minQuote   = t.ctx.Config.MinQuote
-		closePrice = df.Close.Last(0)
-	)
-
+	step := 1
 	if t.currentGrid == 0 {
-		if quotePosition > minQuote {
+		if quotePosition > t.ctx.Config.MinQuote {
 			t.gridQuantity = math.Floor(quotePosition / t.gridNumber)
 
 			c1 := df.High.Crossover(df.Metadata["ub"])
 			if c1 {
-				order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.gridQuantity)
+				_, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.gridQuantity)
 				if err != nil {
 					t.ctx.Logger.Error(err)
 				}
 
-				t.order = order
-				t.totalQuantity = t.totalQuantity + t.order.Quantity
-				t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
-				t.averagePurchaseCost = t.totalCost / t.totalQuantity
-				t.stopLosePoint = t.averagePurchaseCost + df.Metadata["atr"].Last(0)*supPercent
-				t.takeProfitPoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*sdownPercent
 				t.currentGrid++
-
-				t.trailingStop.Start(t.averagePurchaseCost, t.stopLosePoint)
+				t.stopLosePoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
+				t.takeProfitPoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
+				t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
 			}
 		}
 	} else {
-		if quotePosition >= t.gridQuantity && closePrice >= t.stopLosePoint {
-			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.gridQuantity)
+		if quotePosition >= t.gridQuantity && df.Close.Last(0) >= t.stopLosePoint {
+			_, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.gridQuantity)
 			if err != nil {
 				t.ctx.Logger.Error(err)
 			}
 
-			t.order = order
-			t.totalQuantity = t.totalQuantity + t.order.Quantity
-			t.totalCost = t.totalCost + t.order.Price*t.order.Quantity
-			t.averagePurchaseCost = t.totalCost / t.totalQuantity
-			t.stopLosePoint = t.averagePurchaseCost + df.Metadata["atr"].Last(0)*supPercent
-			t.takeProfitPoint = t.averagePurchaseCost - df.Metadata["atr"].Last(0)*sdownPercent
 			t.currentGrid++
-
-			t.trailingStop.Start(t.averagePurchaseCost, t.stopLosePoint)
+			t.stopLosePoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
+			t.takeProfitPoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
+			t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
 		}
 	}
 
-	if t.totalCost > minQuote {
+	if assetPosition > t.ctx.Config.MinQuote {
 		absAssetPosition := math.Abs(assetPosition)
 
 		c1 := df.Low.Crossunder(df.Metadata["lb"])
-		c2 := closePrice <= t.takeProfitPoint
+		c2 := df.Close.Last(0) <= t.takeProfitPoint
 		if c1 || c2 {
-			order, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
+			_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
 			if err != nil {
 				t.ctx.Logger.Error(err)
 			}
 
-			t.order = order
-			t.totalQuantity = 0.0
-			t.totalCost = 0.0
 			t.currentGrid = 0.0
 			t.trailingStop.Stop()
 		}
 
-		if closePrice > t.averagePurchaseCost && quotePosition < t.gridQuantity {
-			if trailing := t.trailingStop; trailing != nil && trailing.Update(closePrice) {
-				order, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
+		if df.High.Last(0) > t.stopLosePoint && quotePosition < t.gridQuantity {
+			if trailing := t.trailingStop; trailing != nil && trailing.Update(df.High.Last(0)) {
+				_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
 				if err != nil {
 					t.ctx.Logger.Error(err)
 				}
 
-				t.order = order
-				t.totalQuantity = 0.0
-				t.totalCost = 0.0
 				t.currentGrid = 0.0
 				t.trailingStop.Stop()
 			}
