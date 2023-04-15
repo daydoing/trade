@@ -153,8 +153,8 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.trailingStop.Stop()
 		}
 
-		if df.Low.Last(0) < t.stopLosePoint && quotePosition < t.gridQuantity {
-			if trailing := t.trailingStop; trailing != nil && trailing.Update(df.Low.Last(0)) {
+		if df.Close.Last(0) < t.stopLosePoint && quotePosition < t.gridQuantity {
+			if trailing := t.trailingStop; trailing != nil && trailing.Update(df.Close.Last(0)) {
 				_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 				if err != nil {
 					t.ctx.Logger.Error(err)
