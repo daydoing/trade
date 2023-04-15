@@ -113,6 +113,8 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 		t.ctx.Logger.Error(err)
 	}
 
+	absAssetPosition := math.Abs(assetPosition)
+
 	step := 1
 	if t.currentGrid == 0 {
 		if quotePosition > t.ctx.Config.MinQuote {
@@ -145,9 +147,7 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 		}
 	}
 
-	if assetPosition > t.ctx.Config.MinQuote {
-		absAssetPosition := math.Abs(assetPosition)
-
+	if absAssetPosition > t.ctx.Config.MinQuote {
 		c1 := df.Low.Crossunder(df.Metadata["lb"])
 		c2 := df.Close.Last(0) <= t.takeProfitPoint
 		if c1 || c2 {
