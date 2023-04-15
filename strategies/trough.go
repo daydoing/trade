@@ -109,6 +109,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 		t.ctx.Logger.Error(err)
 	}
 
+	step := 1
 	if t.currentGrid == 0 {
 		if quotePosition > t.ctx.Config.MinQuote {
 			t.gridQuantity = math.Floor(quotePosition / float64(t.gridNumber))
@@ -121,8 +122,8 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 				}
 
 				t.currentGrid++
-				t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+1)
-				t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+1)
+				t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
+				t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
 				t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
 			}
 		}
@@ -134,8 +135,8 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			}
 
 			t.currentGrid++
-			t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+1)
-			t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+1)
+			t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
+			t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
 			t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
 		}
 	}
