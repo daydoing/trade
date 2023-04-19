@@ -115,7 +115,8 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			t.gridQuantity = math.Floor(quotePosition / float64(t.gridNumber))
 
 			c1 := df.Low.Crossunder(df.Metadata["lb"])
-			if c1 {
+			c2 := df.Close.Last(0) >= df.Metadata["boll"].Last(0)-df.Metadata["atr"].Last(0)*float64(t.gridNumber+step)
+			if c1 && c2 {
 				_, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 				if err != nil {
 					t.ctx.Logger.Error(err)
