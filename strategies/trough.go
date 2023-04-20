@@ -157,13 +157,21 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 
 		if df.Close.Last(0) < t.stopLosePoint && quotePosition < t.gridQuantity {
 			if trailing := t.trailingStop; trailing != nil && trailing.Update(df.Close.Last(0)) {
-				_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
-				if err != nil {
-					t.ctx.Logger.Error(err)
-				}
+				c1 := df.Low.Crossunder(df.Metadata["lb"])
+				c2 := df.Close.Last(0) >= df.Metadata["boll"].Last(0)-df.Metadata["atr"].Last(0)*float64(t.gridNumber+step)
+				if c1 && c2 {
+					t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
+					t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
+					t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
+				} else {
+					_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
+					if err != nil {
+						t.ctx.Logger.Error(err)
+					}
 
-				t.currentGrid = 0.0
-				t.trailingStop.Stop()
+					t.currentGrid = 0.0
+					t.trailingStop.Stop()
+				}
 			}
 		}
 	}
