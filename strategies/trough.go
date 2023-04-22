@@ -97,14 +97,14 @@ func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 
 // source data's timeframe must less then t.timeframe, otherwise it's will be panic for HighFrequencyStrategy
 func (t *trough) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
-	t.execStrategy(df, broker)
+	t.execLongStrategy(df, broker)
 }
 
 func (t *trough) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) {
-	t.execStrategy(df, broker)
+	t.execLongStrategy(df, broker)
 }
 
-func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
+func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	c1 := df.High.Crossover(df.Metadata["ub"])
 	if c1 {
 		t.interruptExecution = false

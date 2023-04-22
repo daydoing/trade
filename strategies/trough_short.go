@@ -19,15 +19,16 @@ const (
 )
 
 type troughShort struct {
-	ctx             context.Context
-	period          int
-	currentGrid     int
-	gridNumber      float64
-	gridQuantity    float64
-	stopLosePoint   float64
-	takeProfitPoint float64
-	timeframe       string
-	trailingStop    *tools.TrailingStop
+	ctx                context.Context
+	period             int
+	currentGrid        int
+	gridNumber         float64
+	gridQuantity       float64
+	stopLosePoint      float64
+	takeProfitPoint    float64
+	timeframe          string
+	interruptExecution bool
+	trailingStop       *tools.TrailingStop
 }
 
 func NewTroughShort(srv context.Context) strategy.HighFrequencyStrategy {
@@ -100,14 +101,23 @@ func (t *troughShort) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicat
 
 // source data's timeframe must less then t.timeframe, otherwise it's will be panic for HighFrequencyStrategy
 func (t *troughShort) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
-	t.execStrategy(df, broker)
+	t.execShortStrategy(df, broker)
 }
 
 func (t *troughShort) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) {
-	t.execStrategy(df, broker)
+	t.execShortStrategy(df, broker)
 }
 
-func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
+func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.Broker) {
+	c1 := df.Low.Crossunder(df.Metadata["lb"])
+	if c1 {
+		t.interruptExecution = false
+	}
+
+	if t.interruptExecution {
+		return
+	}
+
 	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
 		t.ctx.Logger.Error(err)
@@ -162,20 +172,14 @@ func (t *troughShort) execStrategy(df *ninjabot.Dataframe, broker service.Broker
 
 		if df.High.Last(0) > t.stopLosePoint && quotePosition < t.gridQuantity {
 			if trailing := t.trailingStop; trailing != nil && trailing.Update(df.High.Last(0)) {
-				c1 := df.High.Crossover(df.Metadata["ub"])
-				if c1 {
-					t.stopLosePoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
-					t.takeProfitPoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
-					t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
-				} else {
-					_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
-					if err != nil {
-						t.ctx.Logger.Error(err)
-					}
-
-					t.currentGrid = 0.0
-					t.trailingStop.Stop()
+				_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
+				if err != nil {
+					t.ctx.Logger.Error(err)
 				}
+
+				t.currentGrid = 0.0
+				t.trailingStop.Stop()
+				t.interruptExecution = true
 			}
 		}
 	}
