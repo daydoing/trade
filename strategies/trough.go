@@ -2,6 +2,7 @@ package strategies
 
 import (
 	"math"
+	"time"
 
 	"github.com/rodrigo-brito/ninjabot"
 	"github.com/rodrigo-brito/ninjabot/indicator"
@@ -26,6 +27,7 @@ type trough struct {
 	stopLosePoint   float64
 	takeProfitPoint float64
 	trailingStop    *tools.TrailingStop
+	lastSellTime    time.Time
 }
 
 func NewTrough(srv context.Context) strategy.HighFrequencyStrategy {
@@ -117,7 +119,18 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 			c1 := df.Low.Crossunder(df.Metadata["lb"])
 			c2 := df.Close.Last(0) >= df.Metadata["boll"].Last(0)-df.Metadata["atr"].Last(0)*float64(t.gridNumber+step)
 			if c1 && c2 {
-				_, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
+				timeframe := t.ctx.Config.Strategy.Timeframe
+
+				duration, err := time.ParseDuration(timeframe)
+				if err != nil {
+					t.ctx.Logger.Error(err)
+				}
+
+				if time.Since(t.lastSellTime) < duration {
+					return
+				}
+
+				_, err = broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.gridQuantity)
 				if err != nil {
 					t.ctx.Logger.Error(err)
 				}
@@ -171,6 +184,7 @@ func (t *trough) execStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 
 					t.currentGrid = 0.0
 					t.trailingStop.Stop()
+					t.lastSellTime = time.Now()
 				}
 			}
 		}
