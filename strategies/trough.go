@@ -151,7 +151,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 		}
 	}
 
-	if assetPosition > t.ctx.Config.MinQuote {
+	if assetPosition*df.Close.Last(0) > t.ctx.Config.MinQuote {
 		c1 := df.High.Crossover(df.Metadata["ub"])
 		c2 := df.High.Last(0) >= t.takeProfitPoint
 		if c1 || c2 {
