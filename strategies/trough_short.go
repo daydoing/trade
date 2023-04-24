@@ -14,7 +14,7 @@ import (
 
 const (
 	sbbPeriod   = 20
-	sdeviation  = 3
+	sdeviation  = 2
 	sgridNumber = 3
 )
 
@@ -153,6 +153,12 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 			t.currentGrid++
 			t.stopLosePoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
 			t.takeProfitPoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
+
+			diff := df.Close.Last(0) - t.stopLosePoint
+			if diff < df.Metadata["atr"].Last(0) {
+				t.stopLosePoint = t.stopLosePoint + df.Metadata["atr"].Last(0)
+			}
+
 			t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
 		}
 	}
