@@ -147,6 +147,12 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 			t.currentGrid++
 			t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
 			t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
+
+			diff := t.stopLosePoint - df.Close.Last(0)
+			if diff < df.Metadata["atr"].Last(0) {
+				t.stopLosePoint = t.stopLosePoint - df.Metadata["atr"].Last(0)
+			}
+
 			t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
 		}
 	}
