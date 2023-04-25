@@ -14,7 +14,7 @@ import (
 
 const (
 	sbbPeriod   = 20
-	sdeviation  = 2
+	sdeviation  = 3
 	sgridNumber = 3
 )
 
