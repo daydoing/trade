@@ -1,7 +1,7 @@
 package arbitrage
 
 import (
-	"fmt"
+	"math"
 	"math/big"
 
 	"github.com/daydoing/trade/context"
@@ -47,10 +47,31 @@ func (a *Arbitrage) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 }
 
 func (a *Arbitrage) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) {
-	a1, a2, err := uni.LPTokenAmount(a.ChainClient, a.tokenID, a.token0, a.token1)
+	a1, _, err := uni.LPTokenAmount(a.ChainClient, a.tokenID, a.token0, a.token1)
 	if err != nil {
 		a.Logger.Error(err)
 	}
 
-	fmt.Println(a1, a2)
+	assetPosition, _, err := broker.Position(df.Pair)
+	if err != nil {
+		a.Logger.Error(err)
+	}
+
+	close := df.Close.Last(0)
+	diff := math.Abs(assetPosition - a1)
+	if diff*close > a.Config.MinQuote {
+		if a1 > assetPosition {
+			_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, diff)
+			if err != nil {
+				a.Logger.Error(err)
+			}
+		}
+
+		if a1 < assetPosition {
+			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, diff)
+			if err != nil {
+				a.Logger.Error(err)
+			}
+		}
+	}
 }
