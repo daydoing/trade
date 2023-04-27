@@ -39,6 +39,10 @@ func initViper() (c *config.Config, err error) {
 	viper.BindEnv("strategy.timeframe")
 	viper.BindEnv("strategy.period")
 
+	viper.BindEnv("arbitrage.rpc_url")
+	viper.BindEnv("arbitrage.private_key")
+	viper.BindEnv("arbitrage.chain_id")
+
 	viper.BindEnv("sentry.dsn")
 
 	if err = viper.Unmarshal(&c); err != nil {
