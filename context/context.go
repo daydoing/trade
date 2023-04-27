@@ -2,6 +2,7 @@ package context
 
 import (
 	"context"
+	"errors"
 
 	"github.com/daoleno/uniswapv3-sdk/examples/helper"
 	"github.com/daydoing/trade/config"
@@ -28,14 +29,14 @@ func NewContext() (Context, error) {
 		return Context{}, err
 	}
 
-	client, err := ethclient.Dial(helper.PolygonRPC)
+	client, err := ethclient.Dial(c.RpcURL)
 	if err != nil {
 		return Context{}, err
 	}
 
 	wallet := helper.InitWallet(c.PrivateKey)
 	if wallet == nil {
-		return Context{}, err
+		return Context{}, errors.New("incorrect wallet key")
 	}
 
 	return Context{Context: context.Background(), Config: c, Logger: l, ChainClient: client, ChainWallet: wallet}, nil
