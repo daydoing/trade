@@ -25,8 +25,8 @@ func NewArbitrage(ctx context.Context) (strategy.HighFrequencyStrategy, error) {
 	return &Arbitrage{
 		Context: ctx,
 		tokenID: big.NewInt(573925),
-		token0:  core.NewToken(42161, common.HexToAddress("0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8"), 6, "USDC", "USD Coin"),
-		token1:  core.NewToken(42161, common.HexToAddress("0x912CE59144191C1204E64559FE8253a0e49E6548"), 18, "ARB", "Arbitrum Coin"),
+		token0:  core.NewToken(42161, common.HexToAddress("0x912CE59144191C1204E64559FE8253a0e49E6548"), 18, "ARB", "Arbitrum Coin"),
+		token1:  core.NewToken(42161, common.HexToAddress("0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8"), 6, "USDC", "USD Coin"),
 	}, nil
 }
 
