@@ -22,7 +22,7 @@ type Arbitrage struct {
 	openPositionPrice float64
 }
 
-func NewArbitrage(ctx context.Context) (strategy.HighFrequencyStrategy, error) {
+func NewArbitrage(ctx context.Context) (strategy.Strategy, error) {
 	return &Arbitrage{
 		Context:           ctx,
 		tokenID:           big.NewInt(573925),
@@ -45,10 +45,6 @@ func (a *Arbitrage) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator
 }
 
 func (a *Arbitrage) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
-
-}
-
-func (a *Arbitrage) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) {
 	close := df.Close.Last(0)
 	if close >= a.openPositionPrice {
 		return
