@@ -55,18 +55,20 @@ func (a *Arbitrage) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
 		a.Logger.Error(err)
 	}
 
+	absAssetPosition := math.Abs(assetPosition)
+
 	close := df.Close.Last(0)
-	diff := math.Abs(assetPosition - a1)
+	diff := math.Abs(absAssetPosition - a1)
 
 	if diff*close > a.Config.MinQuote {
-		if a1 > assetPosition {
+		if a1 > absAssetPosition {
 			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, diff)
 			if err != nil {
 				a.Logger.Error(err)
 			}
 		}
 
-		if a1 < assetPosition && close < a.openPositionPrice {
+		if a1 < absAssetPosition {
 			_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, diff)
 			if err != nil {
 				a.Logger.Error(err)
