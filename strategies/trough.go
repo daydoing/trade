@@ -20,7 +20,7 @@ const (
 
 type trough struct {
 	ctx                context.Context
-	currentGrid        int
+	currentBuyGrid     int
 	gridNumber         int
 	gridQuantity       float64
 	stopLosePoint      float64
@@ -120,7 +120,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 	}
 
 	step := 1
-	if t.currentGrid == 0 {
+	if t.currentBuyGrid == 0 {
 		if quotePosition > t.ctx.Config.MinQuote {
 			t.gridQuantity = math.Floor(quotePosition / float64(t.gridNumber))
 
@@ -131,9 +131,9 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 					t.ctx.Logger.Error(err)
 				}
 
-				t.currentGrid++
-				t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
-				t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
+				t.currentBuyGrid++
+				t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentBuyGrid+step)
+				t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentBuyGrid+step)
 				t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
 			}
 		}
@@ -144,9 +144,9 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 				t.ctx.Logger.Error(err)
 			}
 
-			t.currentGrid++
-			t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
-			t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentGrid+step)
+			t.currentBuyGrid++
+			t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentBuyGrid+step)
+			t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentBuyGrid+step)
 
 			diff := t.stopLosePoint - df.Close.Last(0)
 			if diff < df.Metadata["atr"].Last(0) {
@@ -166,7 +166,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 				t.ctx.Logger.Error(err)
 			}
 
-			t.currentGrid = 0.0
+			t.currentBuyGrid = 0.0
 			t.trailingStop.Stop()
 		}
 
@@ -179,7 +179,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 
 				t.ctx.Logger.Info("Important reminder: the market situation may reverse.")
 
-				t.currentGrid = 0.0
+				t.currentBuyGrid = 0.0
 				t.trailingStop.Stop()
 				t.interruptExecution = true
 			}
