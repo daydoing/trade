@@ -48,11 +48,13 @@ func (t *trough) WarmupPeriod() int {
 func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 	df.Metadata["atr"] = indicator.ATR(df.High, df.Low, df.Close, bbPeriod/2)
 	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, bbPeriod, deviation, indicator.TypeEMA)
+	df.Metadata["kcHigh"] = indicator.EMA(df.High, t.ctx.Config.Strategy.Period)
+	df.Metadata["kcLow"] = indicator.EMA(df.Low, t.ctx.Config.Strategy.Period)
 
 	return []strategy.ChartIndicator{
 		{
 			Overlay:   true,
-			GroupName: "UB",
+			GroupName: "BB",
 			Time:      df.Time,
 			Warmup:    t.ctx.Config.Strategy.Period,
 			Metrics: []strategy.IndicatorMetric{
@@ -66,7 +68,7 @@ func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 		},
 		{
 			Overlay:   true,
-			GroupName: "BOLL",
+			GroupName: "BB",
 			Time:      df.Time,
 			Warmup:    t.ctx.Config.Strategy.Period,
 			Metrics: []strategy.IndicatorMetric{
@@ -80,7 +82,7 @@ func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 		},
 		{
 			Overlay:   true,
-			GroupName: "LB",
+			GroupName: "BB",
 			Time:      df.Time,
 			Warmup:    t.ctx.Config.Strategy.Period,
 			Metrics: []strategy.IndicatorMetric{
@@ -88,6 +90,34 @@ func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 					Values: df.Metadata["lb"],
 					Name:   "LB",
 					Color:  "blue",
+					Style:  strategy.StyleLine,
+				},
+			},
+		},
+		{
+			Overlay:   true,
+			GroupName: "KC",
+			Time:      df.Time,
+			Warmup:    t.ctx.Config.Strategy.Period,
+			Metrics: []strategy.IndicatorMetric{
+				{
+					Values: df.Metadata["kcHigh"],
+					Name:   "High",
+					Color:  "green",
+					Style:  strategy.StyleLine,
+				},
+			},
+		},
+		{
+			Overlay:   true,
+			GroupName: "KC",
+			Time:      df.Time,
+			Warmup:    t.ctx.Config.Strategy.Period,
+			Metrics: []strategy.IndicatorMetric{
+				{
+					Values: df.Metadata["kcLow"],
+					Name:   "Low",
+					Color:  "red",
 					Style:  strategy.StyleLine,
 				},
 			},
