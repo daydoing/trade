@@ -162,7 +162,8 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 	if assetPosition*df.Close.Last(0) > t.ctx.Config.MinQuote {
 		if t.currentSellGridNumber == 0 {
 			c1 := df.High.Crossover(df.Metadata["ub"])
-			if c1 {
+			c2 := df.Close.Last(0) > t.takeProfitPoint
+			if c1 || c2 {
 				t.assetPositionSize = assetPosition / float64(t.currentBuyGridNumber)
 				_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, t.assetPositionSize)
 				if err != nil {
