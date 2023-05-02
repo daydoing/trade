@@ -160,32 +160,17 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 	}
 
 	if assetPosition*df.Close.Last(0) > t.ctx.Config.MinQuote {
-		if t.currentSellGridNumber == 0 {
-			c1 := df.High.Crossover(df.Metadata["ub"])
-			c2 := df.Close.Last(0) > t.takeProfitPoint
-			if c1 || c2 {
-				t.assetPositionSize = assetPosition / float64(t.currentBuyGridNumber)
-				_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, t.assetPositionSize)
-				if err != nil {
-					t.ctx.Logger.Error(err)
-				}
-
-				t.currentSellGridNumber++
-				t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentSellGridNumber+step)
+		c1 := df.High.Crossover(df.Metadata["ub"])
+		c2 := df.Close.Last(0) > t.takeProfitPoint
+		if c1 || c2 {
+			t.assetPositionSize = assetPosition / float64(t.currentBuyGridNumber)
+			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, t.assetPositionSize)
+			if err != nil {
+				t.ctx.Logger.Error(err)
 			}
-		} else {
-			if assetPosition >= t.assetPositionSize && df.Close.Last(0) >= t.takeProfitPoint {
-				_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, t.assetPositionSize)
-				if err != nil {
-					t.ctx.Logger.Error(err)
-				}
 
-				t.currentSellGridNumber++
-				t.takeProfitPoint = df.Metadata["boll"].Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentSellGridNumber+step)
-			} else {
-				t.currentBuyGridNumber = 0
-				t.trailingStop.Stop()
-			}
+			t.currentBuyGridNumber = 0.0
+			t.trailingStop.Stop()
 		}
 
 		if df.Close.Last(0) < t.stopLosePoint && quotePosition < t.quotePositionSize {
@@ -198,8 +183,8 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 				t.ctx.Logger.Info("Important reminder: the market situation may reverse.")
 
 				t.currentBuyGridNumber = 0.0
-				t.trailingStop.Stop()
 				t.interruptExecution = true
+				t.trailingStop.Stop()
 			}
 		}
 	}
