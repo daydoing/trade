@@ -23,6 +23,7 @@ type trough struct {
 	gridNumber            int
 	currentBuyGridNumber  int
 	currentSellGridNumber int
+	step                  int
 	quotePositionSize     float64
 	assetPositionSize     float64
 	stopLosePoint         float64
@@ -34,6 +35,7 @@ type trough struct {
 func NewTrough(srv context.Context) strategy.HighFrequencyStrategy {
 	return &trough{
 		ctx:          srv,
+		step:         1,
 		gridNumber:   gridNumber,
 		trailingStop: tools.NewTrailingStop(),
 	}
@@ -48,7 +50,7 @@ func (t *trough) WarmupPeriod() int {
 }
 
 func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
-	df.Metadata["atr"] = indicator.ATR(df.High, df.Low, df.Close, bbPeriod/2)
+	df.Metadata["atr"] = indicator.ATR(df.High, df.Low, df.Close, t.currentBuyGridNumber+1)
 	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, bbPeriod, deviation, indicator.TypeEMA)
 
 	return []strategy.ChartIndicator{
@@ -121,7 +123,6 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 		t.ctx.Logger.Error(err)
 	}
 
-	step := 1
 	if t.currentBuyGridNumber == 0 {
 		if quotePosition > t.ctx.Config.MinQuote {
 			t.quotePositionSize = math.Floor(quotePosition / float64(t.gridNumber))
@@ -134,8 +135,8 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 				}
 
 				t.currentBuyGridNumber++
-				t.stopLosePoint = df.Close.Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentBuyGridNumber+step)
-				t.takeProfitPoint = df.Close.Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentBuyGridNumber+step)
+				t.stopLosePoint = df.Close.Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentBuyGridNumber+t.step)
+				t.takeProfitPoint = df.Close.Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentBuyGridNumber+t.step)
 				t.trailingStop.Start(df.Close.Last(0), t.stopLosePoint)
 			}
 		}
@@ -147,8 +148,8 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 			}
 
 			t.currentBuyGridNumber++
-			t.stopLosePoint = df.Close.Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentBuyGridNumber+step)
-			t.takeProfitPoint = df.Close.Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentBuyGridNumber+step)
+			t.stopLosePoint = df.Close.Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentBuyGridNumber+t.step)
+			t.takeProfitPoint = df.Close.Last(0) + df.Metadata["atr"].Last(0)*float64(t.currentBuyGridNumber+t.step)
 
 			diff := t.stopLosePoint - df.Close.Last(0)
 			if diff < df.Metadata["atr"].Last(0) {
