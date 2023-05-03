@@ -182,7 +182,7 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 		}
 	}
 
-	if absAssetPosition*df.Close.Last(0) > t.ctx.Config.MinQuote {
+	if absAssetPosition*df.Close.Last(0) > t.ctx.Config.MinQuote && t.takeProfitPoint != 0 {
 		c1 := df.Low.Crossunder(df.Metadata["lb"])
 		c2 := df.Close.Last(0) <= t.takeProfitPoint
 		if c1 || c2 {
