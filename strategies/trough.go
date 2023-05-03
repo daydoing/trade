@@ -24,7 +24,6 @@ type trough struct {
 	currentBuyGridNumber int
 	step                 int
 	quotePositionSize    float64
-	assetPositionSize    float64
 	stopLosePoint        float64
 	takeProfitPoint      float64
 	interruptExecution   bool
@@ -122,21 +121,6 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 		t.ctx.Logger.Error(err)
 	}
 
-	if assetPosition*df.Close.Last(0) > t.ctx.Config.MinQuote {
-		c1 := df.High.Crossover(df.Metadata["ub"])
-		c2 := df.Close.Last(0) > t.takeProfitPoint
-		if c1 || c2 {
-			t.assetPositionSize = assetPosition / float64(t.currentBuyGridNumber)
-			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, t.assetPositionSize)
-			if err != nil {
-				t.ctx.Logger.Error(err)
-			}
-
-			t.currentBuyGridNumber = 0.0
-			t.trailingStop.Stop()
-		}
-	}
-
 	if t.currentBuyGridNumber == 0 {
 		t.quotePositionSize = math.Floor(quotePosition / float64(t.gridNumber))
 		if t.quotePositionSize > t.ctx.Config.MinQuote {
@@ -188,6 +172,20 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 					}
 				}
 			}
+		}
+	}
+
+	if assetPosition*df.Close.Last(0) > t.ctx.Config.MinQuote {
+		c1 := df.High.Crossover(df.Metadata["ub"])
+		c2 := df.Close.Last(0) > t.takeProfitPoint
+		if c1 || c2 {
+			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
+			if err != nil {
+				t.ctx.Logger.Error(err)
+			}
+
+			t.currentBuyGridNumber = 0.0
+			t.trailingStop.Stop()
 		}
 	}
 }
