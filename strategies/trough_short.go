@@ -123,6 +123,7 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
 		t.ctx.Logger.Error(err)
+		return
 	}
 
 	absAssetPosition := math.Abs(assetPosition)
@@ -135,6 +136,7 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 				_, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.quotePositionSize)
 				if err != nil {
 					t.ctx.Logger.Error(err)
+					return
 				}
 
 				t.currentSellGridNumber++
@@ -149,6 +151,7 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 				_, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeSell, df.Pair, t.quotePositionSize)
 				if err != nil {
 					t.ctx.Logger.Error(err)
+					return
 				}
 
 				t.currentSellGridNumber++
@@ -167,6 +170,7 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 						_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
 						if err != nil {
 							t.ctx.Logger.Error(err)
+							return
 						}
 
 						t.currentSellGridNumber = 0.0
@@ -185,6 +189,7 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 			_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
 			if err != nil {
 				t.ctx.Logger.Error(err)
+				return
 			}
 
 			t.currentSellGridNumber = 0.0

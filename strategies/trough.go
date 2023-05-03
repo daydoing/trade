@@ -119,6 +119,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
 		t.ctx.Logger.Error(err)
+		return
 	}
 
 	if t.currentBuyGridNumber == 0 {
@@ -129,6 +130,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 				_, err = broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.quotePositionSize)
 				if err != nil {
 					t.ctx.Logger.Error(err)
+					return
 				}
 
 				t.currentBuyGridNumber++
@@ -144,6 +146,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 				_, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.quotePositionSize)
 				if err != nil {
 					t.ctx.Logger.Error(err)
+					return
 				}
 
 				t.currentBuyGridNumber++
@@ -162,6 +165,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 						_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 						if err != nil {
 							t.ctx.Logger.Error(err)
+							return
 						}
 
 						t.ctx.Logger.Info("Important reminder: the market situation may reverse.")
@@ -182,6 +186,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 			if err != nil {
 				t.ctx.Logger.Error(err)
+				return
 			}
 
 			t.currentBuyGridNumber = 0.0
