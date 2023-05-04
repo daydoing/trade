@@ -107,10 +107,6 @@ func (t *trough) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) 
 }
 
 func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker) {
-	if df.Metadata["ub"].Last(0)-df.Metadata["lb"].Last(0) < df.Metadata["atr"].Last(0)*float64(t.gridNumber) {
-		return
-	}
-
 	c1 := df.High.Crossover(df.Metadata["ub"])
 	if c1 {
 		t.interruptExecution = false
@@ -130,7 +126,9 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 		t.quotePositionSize = math.Floor(quotePosition / float64(t.gridNumber))
 		if t.quotePositionSize > t.ctx.Config.MinQuote {
 			c1 := df.Low.Crossunder(df.Metadata["lb"])
-			if c1 {
+			c2 := df.Metadata["ub"].Last(0)-df.Metadata["lb"].Last(0) > df.Metadata["atr"].Last(0)*float64(t.gridNumber)
+			c3 := df.Metadata["ub"].Last(0)-df.Metadata["lb"].Last(0) < df.Metadata["atr"].Last(0)*float64(t.gridNumber*2)
+			if c1 && c2 && c3 {
 				_, err = broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.quotePositionSize)
 				if err != nil {
 					t.ctx.Logger.Error(err)
