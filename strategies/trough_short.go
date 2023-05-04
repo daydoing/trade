@@ -111,6 +111,10 @@ func (t *troughShort) OnPartialCandle(df *ninjabot.Dataframe, broker service.Bro
 }
 
 func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.Broker) {
+	if df.Metadata["ub"].Last(0)-df.Metadata["lb"].Last(0) < df.Metadata["atr"].Last(0)*float64(t.gridNumber) {
+		return
+	}
+
 	c1 := df.Low.Crossunder(df.Metadata["lb"])
 	if c1 {
 		t.interruptExecution = false

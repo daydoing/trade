@@ -107,6 +107,10 @@ func (t *trough) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) 
 }
 
 func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker) {
+	if df.Metadata["ub"].Last(0)-df.Metadata["lb"].Last(0) < df.Metadata["atr"].Last(0)*float64(t.gridNumber) {
+		return
+	}
+
 	c1 := df.High.Crossover(df.Metadata["ub"])
 	if c1 {
 		t.interruptExecution = false
