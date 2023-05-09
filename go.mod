@@ -90,5 +90,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/gorm v1.25.0 // indirect
 )
-
-replace github.com/rodrigo-brito/ninjabot v0.3.3 => ./pkg/ninjabot
