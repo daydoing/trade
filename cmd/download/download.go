@@ -1,6 +1,8 @@
 package download
 
 import (
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/rodrigo-brito/ninjabot/download"
@@ -21,8 +23,8 @@ func DownloadCommand(ctx context.Context) *cobra.Command {
 				start     = ctx.Config.Feed.Start
 				end       = ctx.Config.Feed.End
 				timeframe = ctx.Config.Feed.Timeframe
-				pair      = ctx.Config.Feed.Pair
-				output    = ctx.Config.Feed.Path
+				pairs     = ctx.Config.Feed.Pairs
+				path      = ctx.Config.Feed.Path
 			)
 
 			var (
@@ -59,7 +61,21 @@ func DownloadCommand(ctx context.Context) *cobra.Command {
 				options = append(options, download.WithInterval(startTime, endTime))
 			}
 
-			return download.NewDownloader(exc).Download(ctx, pair, timeframe, output, options...)
+			ec := make(chan error)
+
+			for _, pair := range pairs {
+				output := filepath.Join(path, strings.Join([]string{pair, timeframe}, "_")) + ".csv"
+				go func(pair string) {
+					ec <- download.NewDownloader(exc).Download(ctx, pair, timeframe, output, options...)
+				}(pair)
+
+				err := <-ec
+				if err != nil {
+					return err
+				}
+			}
+
+			return nil
 		},
 	}
 }

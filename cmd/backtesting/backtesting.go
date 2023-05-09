@@ -2,6 +2,8 @@ package backtesting
 
 import (
 	"log"
+	"path/filepath"
+	"strings"
 
 	"github.com/rodrigo-brito/ninjabot"
 	"github.com/rodrigo-brito/ninjabot/exchange"
@@ -22,8 +24,8 @@ func BacktestingCommand(ctx context.Context) *cobra.Command {
 				pairs        = ctx.Config.System.Pairs
 				baseCoin     = ctx.Config.System.BaseCoin
 				amount       = ctx.Config.System.Amount
-				pair         = ctx.Config.Feed.Pair
-				file         = ctx.Config.Feed.Path
+				feedPairs    = ctx.Config.Feed.Pairs
+				path         = ctx.Config.Feed.Path
 				timeframe    = ctx.Config.Feed.Timeframe
 				maker        = ctx.Config.Binance.Maker
 				taker        = ctx.Config.Binance.Taker
@@ -39,13 +41,18 @@ func BacktestingCommand(ctx context.Context) *cobra.Command {
 				return err
 			}
 
+			pairFeed := []exchange.PairFeed{}
+			for _, pair := range feedPairs {
+				pairFeed = append(pairFeed, exchange.PairFeed{
+					Pair:      pair,
+					File:      filepath.Join(path, strings.Join([]string{pair, timeframe}, "_")) + ".csv",
+					Timeframe: timeframe,
+				})
+			}
+
 			csvFeed, err := exchange.NewCSVFeed(
 				strategy.Timeframe(),
-				exchange.PairFeed{
-					Pair:      pair,
-					File:      file,
-					Timeframe: timeframe,
-				},
+				pairFeed...,
 			)
 			if err != nil {
 				return err

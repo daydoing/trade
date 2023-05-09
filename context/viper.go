@@ -29,7 +29,7 @@ func initViper() (c *config.Config, err error) {
 	viper.BindEnv("telegram.token")
 
 	viper.BindEnv("feed.futures")
-	viper.BindEnv("feed.pair")
+	viper.BindEnv("feed.pairs")
 	viper.BindEnv("feed.timeframe")
 	viper.BindEnv("feed.start")
 	viper.BindEnv("feed.end")
