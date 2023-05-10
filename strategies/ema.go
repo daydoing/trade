@@ -3,18 +3,22 @@ package strategies
 import (
 	"github.com/rodrigo-brito/ninjabot"
 	"github.com/rodrigo-brito/ninjabot/indicator"
+	"github.com/rodrigo-brito/ninjabot/model"
 	"github.com/rodrigo-brito/ninjabot/service"
 	"github.com/rodrigo-brito/ninjabot/strategy"
 
 	"github.com/daydoing/trade/context"
 )
 
+const BTCUSDT = "BTCUSDT"
+
 type crossEMA struct {
-	ctx context.Context
+	ctx       context.Context
+	dataframe map[string]*ninjabot.Dataframe
 }
 
 func NewCrossEMA(ctx context.Context) strategy.Strategy {
-	return &crossEMA{ctx: ctx}
+	return &crossEMA{ctx: ctx, dataframe: make(map[string]*model.Dataframe)}
 }
 
 func (e *crossEMA) Timeframe() string {
@@ -28,6 +32,8 @@ func (e *crossEMA) WarmupPeriod() int {
 func (e *crossEMA) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
 	// define a custom indicator, Exponential Moving Average of 9 periods
 	df.Metadata["ema9"] = indicator.EMA(df.Close, 9)
+
+	e.dataframe[df.Pair] = df
 
 	// (Optional) you can return a list of indicators to include in the final chart
 	return []strategy.ChartIndicator{
@@ -48,6 +54,10 @@ func (e *crossEMA) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator 
 }
 
 func (e *crossEMA) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
+	if df.Pair == BTCUSDT {
+		return
+	}
+
 	// Get the quote and assets information
 	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
