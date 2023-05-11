@@ -40,7 +40,7 @@ func PaperwalletCommand(ctx context.Context) *cobra.Command {
 				return err
 			}
 
-			binance, err := exchange.NewBinance(ctx, exchange.WithTestNet())
+			binance, err := exchange.NewBinance(ctx)
 			if err != nil {
 				return err
 			}
