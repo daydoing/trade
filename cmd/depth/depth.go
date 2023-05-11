@@ -41,11 +41,11 @@ func DepthCommand(ctx context.Context) *cobra.Command {
 				quantityDiff := bidQuantity - askQuantity
 
 				if priceDiff > 0 && quantityDiff > 0 {
-					fmt.Println("buy single")
+					fmt.Println("buy signle")
 				}
 
 				if priceDiff < 0 && quantityDiff < 0 {
-					fmt.Println("sell single")
+					fmt.Println("sell signle")
 				}
 			}
 
