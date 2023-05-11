@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/daydoing/trade/cmd/arbitrage"
 	"github.com/daydoing/trade/cmd/backtesting"
+	"github.com/daydoing/trade/cmd/depth"
 	"github.com/daydoing/trade/cmd/download"
 	"github.com/daydoing/trade/cmd/futures"
 	"github.com/daydoing/trade/cmd/paperwallet"
@@ -31,7 +31,7 @@ func main() {
 	cmd.AddCommand(download.DownloadCommand(srv))
 	cmd.AddCommand(spot.SpotMarketCommand(srv))
 	cmd.AddCommand(futures.FuturesMarketCommand(srv))
-	cmd.AddCommand(arbitrage.ArbitrageCommand(srv))
+	cmd.AddCommand(depth.DepthCommand(srv))
 
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

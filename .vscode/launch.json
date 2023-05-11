@@ -37,7 +37,7 @@
             "args": ["futures"]
         },
         {
-            "name": "Arbitrage",
+            "name": "Depth",
             "type": "go",
             "request": "launch",
             "mode": "auto",

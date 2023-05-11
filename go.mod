@@ -3,6 +3,7 @@ module github.com/daydoing/trade
 go 1.20
 
 require (
+	github.com/adshao/go-binance/v2 v2.4.2
 	github.com/daoleno/uniswap-sdk-core v0.1.7
 	github.com/daoleno/uniswapv3-sdk v0.4.0
 	github.com/ethereum/go-ethereum v1.11.6
@@ -16,7 +17,6 @@ require (
 
 require (
 	github.com/StudioSol/set v1.0.0 // indirect
-	github.com/adshao/go-binance/v2 v2.4.2 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d // indirect
