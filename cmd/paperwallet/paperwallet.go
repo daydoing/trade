@@ -16,16 +16,23 @@ func PaperwalletCommand(ctx context.Context) *cobra.Command {
 		Short: "Paperwallet is a simulated run of trading strategies",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				pairs        = ctx.Config.System.Pairs
-				maker        = ctx.Config.Binance.Maker
-				taker        = ctx.Config.Binance.Taker
-				baseCoin     = ctx.Config.System.BaseCoin
-				amount       = ctx.Config.System.Amount
-				strategyName = ctx.Config.Strategy.Name
+				pairs         = ctx.Config.System.Pairs
+				maker         = ctx.Config.Binance.Maker
+				taker         = ctx.Config.Binance.Taker
+				baseCoin      = ctx.Config.System.BaseCoin
+				amount        = ctx.Config.System.Amount
+				strategyName  = ctx.Config.Strategy.Name
+				telegramToken = ctx.Config.Telegram.Token
+				telegramUser  = ctx.Config.Telegram.UID
 			)
 
 			settings := ninjabot.Settings{
 				Pairs: pairs,
+				Telegram: ninjabot.TelegramSettings{
+					Enabled: true,
+					Token:   telegramToken,
+					Users:   []int{telegramUser},
+				},
 			}
 
 			strategy, err := strategies.Strategy(strategyName, ctx)
