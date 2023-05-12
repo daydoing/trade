@@ -61,6 +61,7 @@ func main() {
 	contractAddress := common.HexToAddress("0x92D6C1e31e14520e676a687F0a93788B716BEff5")
 	query := ethereum.FilterQuery{
 		Addresses: []common.Address{contractAddress},
+		Topics:    [][]common.Hash{{iface.Events["Transfer"].ID}},
 	}
 
 	logs := make(chan types.Log)
@@ -74,8 +75,7 @@ func main() {
 		case err := <-sub.Err():
 			log.Fatal(err)
 		case v := <-logs:
-			if v.Address == contractAddress && v.Topics[0] == common.HexToHash("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef") {
-				// 解码Transfer事件
+			if v.Address == contractAddress && v.Topics[0] == iface.Events["Transfer"].ID {
 				transferEvent := struct {
 					From  common.Address
 					To    common.Address
@@ -86,6 +86,9 @@ func main() {
 				if err != nil {
 					log.Fatalf("Failed to parse transfer log: %v", err)
 				}
+
+				transferEvent.From = common.HexToAddress(v.Topics[1].Hex())
+				transferEvent.To = common.HexToAddress(v.Topics[2].Hex())
 
 				switch transferEvent.To {
 				case binanceAddress:
