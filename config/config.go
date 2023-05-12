@@ -8,4 +8,5 @@ type Config struct {
 	Strategy  `mapstructure:"strategy"`
 	Sentry    `mapstructure:"sentry"`
 	Arbitrage `mapstructure:"arbitrage"`
+	Monitor   `mapstructure:"monitor"`
 }

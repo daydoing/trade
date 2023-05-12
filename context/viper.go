@@ -18,6 +18,8 @@ func initViper() (c *config.Config, err error) {
 	viper.BindEnv("system.amount")
 	viper.BindEnv("system.min_quote")
 	viper.BindEnv("system.pairs")
+	viper.BindEnv("system.telegram.uid")
+	viper.BindEnv("system.telegram.token")
 
 	viper.BindEnv("binance.key")
 	viper.BindEnv("binance.secret")
@@ -42,6 +44,8 @@ func initViper() (c *config.Config, err error) {
 	viper.BindEnv("arbitrage.rpc_url")
 	viper.BindEnv("arbitrage.private_key")
 	viper.BindEnv("arbitrage.chain_id")
+
+	viper.BindEnv("monitor.infura_key")
 
 	viper.BindEnv("sentry.dsn")
 

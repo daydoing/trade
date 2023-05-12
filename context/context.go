@@ -13,6 +13,7 @@ type Context struct {
 	context.Context
 	Config      *config.Config
 	Logger      *logrus.Logger
+	NotifyBot   *NotifyBot
 	ChainClient *ethclient.Client
 	ChainWallet *helper.Wallet
 }
@@ -33,6 +34,11 @@ func NewContext() (Context, error) {
 		return Context{}, err
 	}
 
+	n, err := initNotifyBot(c.System.Telegram.Token, c.System.Telegram.UID)
+	if err != nil {
+		return Context{}, err
+	}
+
 	/*
 		wallet := helper.InitWallet(c.PrivateKey)
 		if wallet == nil {
@@ -40,7 +46,7 @@ func NewContext() (Context, error) {
 		}
 
 	*/
-	return Context{Context: context.Background(), Config: c, Logger: l, ChainClient: client}, nil
+	return Context{Context: context.Background(), Config: c, Logger: l, ChainClient: client, NotifyBot: n}, nil
 }
 
 func (srv *Context) Gc() {}

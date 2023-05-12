@@ -1,7 +1,6 @@
-package main
+package utils
 
-const (
-	dydx = `
+const ABI = `
 	[
 		{
 			"anonymous": false,
@@ -30,4 +29,3 @@ const (
 		}
 	]
 `
-)

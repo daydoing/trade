@@ -5,4 +5,5 @@ type System struct {
 	Amount   float64  `mapstructure:"amount"`
 	MinQuote float64  `mapstructure:"min_quote"`
 	Pairs    []string `mapstructure:"pairs"`
+	Telegram `mapstructure:"telegram"`
 }

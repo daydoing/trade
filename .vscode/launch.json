@@ -49,8 +49,8 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/monitior/main.go",
-            "args": ["arbitrage"]
+            "program": "${workspaceFolder}",
+            "args": ["monitor"]
         },
     ]
 }

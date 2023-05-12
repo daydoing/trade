@@ -8,6 +8,7 @@ import (
 	"github.com/daydoing/trade/cmd/depth"
 	"github.com/daydoing/trade/cmd/download"
 	"github.com/daydoing/trade/cmd/futures"
+	"github.com/daydoing/trade/cmd/monitor"
 	"github.com/daydoing/trade/cmd/paperwallet"
 	"github.com/daydoing/trade/cmd/spot"
 	"github.com/daydoing/trade/context"
@@ -32,6 +33,7 @@ func main() {
 	cmd.AddCommand(spot.SpotMarketCommand(srv))
 	cmd.AddCommand(futures.FuturesMarketCommand(srv))
 	cmd.AddCommand(depth.DepthCommand(srv))
+	cmd.AddCommand(monitor.MonitorCommand(srv))
 
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
