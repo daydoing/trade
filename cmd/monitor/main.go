@@ -97,7 +97,9 @@ func MonitorCommand(ctx context.Context) *cobra.Command {
 			}
 
 			err = <-errs
-			bot.Notify(err.Error())
+
+			content := fmt.Sprintf("error:%s, the bot is stoped", err.Error())
+			bot.Notify(content)
 
 			return err
 		},

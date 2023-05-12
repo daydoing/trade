@@ -12,8 +12,8 @@ import (
 
 func DepthCommand(ctx context.Context) *cobra.Command {
 	return &cobra.Command{
-		Use:   "arbitrage",
-		Short: "Arbitraging Uniswap's trading fees",
+		Use:   "depth",
+		Short: "analyzing the depth of a trading pair",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			const symbol = "DYDXUSDT"
 
