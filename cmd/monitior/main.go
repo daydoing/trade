@@ -16,10 +16,14 @@ import (
 
 func main() {
 	var (
-		okx            = common.HexToAddress("0x6cC5F688a315f3dC28A7781717a9A798a59fDA7b")
-		binanceAddress = common.HexToAddress("0x28C6c06298d514Db089934071355E5743bf21d60")
-		kuCoin         = common.HexToAddress("0xf16E9B0D03470827A95CDfd0Cb8a8A3b46969B91")
-		cexio          = common.HexToAddress("0xc9f5296Eb3ac266c94568D790b6e91ebA7D76a11")
+		okx       = common.HexToAddress("0x6cC5F688a315f3dC28A7781717a9A798a59fDA7b")
+		binance14 = common.HexToAddress("0x28C6c06298d514Db089934071355E5743bf21d60")
+		binance15 = common.HexToAddress("0x21a31Ee1afC51d94C2eFcCAa2092aD1028285549")
+		binance16 = common.HexToAddress("0xDFd5293D8e347dFe59E90eFd55b2956a1343963d")
+		kucoin    = common.HexToAddress("0xf16E9B0D03470827A95CDfd0Cb8a8A3b46969B91")
+		cexio     = common.HexToAddress("0xc9f5296Eb3ac266c94568D790b6e91ebA7D76a11")
+		bybit     = common.HexToAddress("0xf89d7b9c864f589bbF53a82105107622B35EaA40")
+		mexc      = common.HexToAddress("0x75e89d5979E4f6Fba9F97c104c2F0AFB3F1dcB88")
 	)
 
 	// Solidity事件的接口
@@ -91,14 +95,18 @@ func main() {
 				transferEvent.To = common.HexToAddress(v.Topics[2].Hex())
 
 				switch transferEvent.To {
-				case binanceAddress:
+				case binance14, binance15, binance16:
 					fmt.Println("dydx tokens transferred to binance:", transferEvent.Value.String())
 				case okx:
 					fmt.Println("dydx tokens transferred to okx:", transferEvent.Value.String())
-				case kuCoin:
+				case kucoin:
 					fmt.Println("dydx tokens transferred to kucoin:", transferEvent.Value.String())
 				case cexio:
 					fmt.Println("dydx tokens transferred to cex.io:", transferEvent.Value.String())
+				case bybit:
+					fmt.Println("dydx tokens transferred to bybit:", transferEvent.Value.String())
+				case mexc:
+					fmt.Println("dydx tokens transferred to mexc:", transferEvent.Value.String())
 				}
 			}
 		}
