@@ -89,9 +89,10 @@ func MonitorCommand(ctx context.Context) *cobra.Command {
 								if exchange, ok := item[transferEvent.To.String()]; ok {
 									result := big.NewInt(0)
 									result.Div(transferEvent.Value, big.NewInt(1e+18))
-
-									content := fmt.Sprintf("%s transferred to %s, number:%s", token, exchange, result.String())
-									bot.Notify(content)
+									if result.Cmp(big.NewInt(1000)) == 1 {
+										content := fmt.Sprintf("%s transferred to %s, number:%s", token, exchange, result.String())
+										bot.Notify(content)
+									}
 								}
 							}
 						}
