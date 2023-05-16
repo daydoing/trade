@@ -16,7 +16,6 @@ func FuturesMarketCommand(ctx context.Context) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
 				pairs           = ctx.Config.System.Pairs
-				feedPairs       = ctx.Config.Feed.Pairs
 				strategyName    = ctx.Config.Strategy.Name
 				binanceKey      = ctx.Config.Binance.Key
 				binanceSecret   = ctx.Config.Binance.Secret
@@ -37,7 +36,7 @@ func FuturesMarketCommand(ctx context.Context) *cobra.Command {
 			options := []exchange.BinanceFutureOption{
 				exchange.WithBinanceFutureCredentials(binanceKey, binanceSecret),
 			}
-			for _, pair := range feedPairs {
+			for _, pair := range pairs {
 				options = append(options, exchange.WithBinanceFutureLeverage(pair, binanceLeverage, exchange.MarginTypeIsolated))
 			}
 
