@@ -121,12 +121,21 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 		return
 	}
 
+	var (
+		lowPrice   = df.Low.Last(0)
+		clossPrice = df.Close.Last(0)
+		lowBand    = df.Metadata["lb"].Last(0)
+		highBand   = df.Metadata["ub"].Last(0)
+		boll       = df.Metadata["boll"].Last(0)
+		atr        = df.Metadata["atr"].Last(0)
+	)
+
 	if t.currentBuyGridNumber == 0 {
 		t.quotePositionSize = math.Floor(quotePosition / float64(t.gridNumber))
 		if t.quotePositionSize > t.ctx.Config.MinQuote {
-			c1 := df.Low.Crossunder(df.Metadata["lb"])
-			c2 := df.Metadata["ub"].Last(0)-df.Metadata["lb"].Last(0) > df.Metadata["atr"].Last(0)*float64(t.gridNumber)
-			c3 := df.Metadata["ub"].Last(0)-df.Metadata["lb"].Last(0) < df.Metadata["atr"].Last(0)*float64(t.gridNumber*2)
+			c1 := lowPrice < lowBand
+			c2 := highBand-lowBand > atr*float64(t.gridNumber)
+			c3 := highBand-lowBand < atr*float64(t.gridNumber*2)
 			if c1 && c2 && c3 {
 				_, err = broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.quotePositionSize)
 				if err != nil {
@@ -135,7 +144,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 				}
 
 				t.currentBuyGridNumber++
-				t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentBuyGridNumber+t.step)
+				t.stopLosePoint = boll - atr*float64(t.currentBuyGridNumber+t.step)
 
 				t.trailingStop.Start(df.Close.Last(0), t.stopLosePoint)
 			}
@@ -150,11 +159,11 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 				}
 
 				t.currentBuyGridNumber++
-				t.stopLosePoint = df.Metadata["boll"].Last(0) - df.Metadata["atr"].Last(0)*float64(t.currentBuyGridNumber+t.step)
+				t.stopLosePoint = boll - atr*float64(t.currentBuyGridNumber+t.step)
 
 				diff := t.stopLosePoint - df.Close.Last(0)
-				if diff < df.Metadata["atr"].Last(0) {
-					t.stopLosePoint = t.stopLosePoint - df.Metadata["atr"].Last(0)
+				if diff < atr {
+					t.stopLosePoint = t.stopLosePoint - atr
 				}
 
 				t.trailingStop.Start(df.Close.Last(0), t.stopLosePoint)
@@ -178,7 +187,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 		}
 	}
 
-	if assetPosition*df.Close.Last(0) > t.ctx.Config.MinQuote {
+	if assetPosition*clossPrice > t.ctx.Config.MinQuote {
 		c1 := df.High.Crossover(df.Metadata["ub"])
 		if c1 {
 			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
