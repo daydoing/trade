@@ -29,24 +29,12 @@ func NewContext() (Context, error) {
 		return Context{}, err
 	}
 
-	client, err := ethclient.Dial(c.RpcURL)
-	if err != nil {
-		return Context{}, err
-	}
-
 	n, err := initNotifyBot(c.System.Telegram.Token, c.System.Telegram.UID)
 	if err != nil {
 		return Context{}, err
 	}
 
-	/*
-		wallet := helper.InitWallet(c.PrivateKey)
-		if wallet == nil {
-			return Context{}, errors.New("incorrect wallet key")
-		}
-
-	*/
-	return Context{Context: context.Background(), Config: c, Logger: l, ChainClient: client, NotifyBot: n}, nil
+	return Context{Context: context.Background(), Config: c, Logger: l, NotifyBot: n}, nil
 }
 
 func (srv *Context) Gc() {}
