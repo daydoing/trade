@@ -150,7 +150,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 			}
 		}
 	} else {
-		if df.Close.Last(0) <= t.stopLosePoint {
+		if clossPrice <= t.stopLosePoint {
 			if quotePosition >= t.quotePositionSize {
 				_, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.quotePositionSize)
 				if err != nil {
@@ -161,15 +161,15 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 				t.currentBuyGridNumber++
 				t.stopLosePoint = boll - atr*float64(t.currentBuyGridNumber+t.step)
 
-				diff := t.stopLosePoint - df.Close.Last(0)
+				diff := t.stopLosePoint - clossPrice
 				if diff < atr {
 					t.stopLosePoint = t.stopLosePoint - atr
 				}
 
-				t.trailingStop.Start(df.Close.Last(0), t.stopLosePoint)
+				t.trailingStop.Start(clossPrice, t.stopLosePoint)
 			} else {
-				if assetPosition*df.Close.Last(0) > t.ctx.Config.MinQuote {
-					if trailing := t.trailingStop; trailing != nil && trailing.Update(df.Close.Last(0)) {
+				if assetPosition*clossPrice > t.ctx.Config.MinQuote {
+					if trailing := t.trailingStop; trailing != nil && trailing.Update(clossPrice) {
 						_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 						if err != nil {
 							t.ctx.Logger.Error(err)
