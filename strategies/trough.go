@@ -125,7 +125,6 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 		lowPrice   = df.Low.Last(0)
 		clossPrice = df.Close.Last(0)
 		lowBand    = df.Metadata["lb"].Last(0)
-		highBand   = df.Metadata["ub"].Last(0)
 		boll       = df.Metadata["boll"].Last(0)
 		atr        = df.Metadata["atr"].Last(0)
 	)
@@ -134,9 +133,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 		t.quotePositionSize = math.Floor(quotePosition / float64(t.gridNumber))
 		if t.quotePositionSize > t.ctx.Config.MinQuote {
 			c1 := lowPrice < lowBand
-			c2 := highBand-lowBand > atr*float64(t.gridNumber)
-			c3 := highBand-lowBand < atr*float64(t.gridNumber*2)
-			if c1 && c2 && c3 {
+			if c1 {
 				_, err = broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, t.quotePositionSize)
 				if err != nil {
 					t.ctx.Logger.Error(err)
