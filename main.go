@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"log"
 
 	"github.com/daydoing/trade/cmd/backtesting"
 	"github.com/daydoing/trade/cmd/depth"
@@ -23,8 +22,7 @@ func main() {
 
 	srv, err := context.NewContext()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		log.Panic(err)
 	}
 
 	cmd.AddCommand(backtesting.BacktestingCommand(srv))
@@ -36,7 +34,6 @@ func main() {
 	cmd.AddCommand(monitor.MonitorCommand(srv))
 
 	if err := cmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		log.Panic(err)
 	}
 }
