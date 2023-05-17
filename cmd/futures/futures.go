@@ -21,7 +21,7 @@ func FuturesMarketCommand(ctx context.Context) *cobra.Command {
 				binanceSecret   = ctx.Config.Binance.Secret
 				binanceLeverage = ctx.Config.Binance.Leverage
 				telegramToken   = ctx.Config.Telegram.Token
-				telegramUser    = ctx.Config.Telegram.UID
+				telegramUsers   = ctx.Config.Telegram.UID
 			)
 
 			settings := ninjabot.Settings{
@@ -29,7 +29,7 @@ func FuturesMarketCommand(ctx context.Context) *cobra.Command {
 				Telegram: ninjabot.TelegramSettings{
 					Enabled: true,
 					Token:   telegramToken,
-					Users:   []int{telegramUser},
+					Users:   telegramUsers,
 				},
 			}
 

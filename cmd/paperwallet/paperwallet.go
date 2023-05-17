@@ -23,7 +23,7 @@ func PaperwalletCommand(ctx context.Context) *cobra.Command {
 				amount        = ctx.Config.System.Amount
 				strategyName  = ctx.Config.Strategy.Name
 				telegramToken = ctx.Config.Telegram.Token
-				telegramUser  = ctx.Config.Telegram.UID
+				telegramUsers = ctx.Config.Telegram.UID
 			)
 
 			settings := ninjabot.Settings{
@@ -31,7 +31,7 @@ func PaperwalletCommand(ctx context.Context) *cobra.Command {
 				Telegram: ninjabot.TelegramSettings{
 					Enabled: false,
 					Token:   telegramToken,
-					Users:   []int{telegramUser},
+					Users:   telegramUsers,
 				},
 			}
 

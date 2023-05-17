@@ -22,7 +22,6 @@ func MonitorCommand(ctx context.Context) *cobra.Command {
 		Short: "monitoring on-chain transfers",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			bot := ctx.NotifyBot
-
 			rawurl := fmt.Sprintf("wss://mainnet.infura.io/ws/v3/%s", ctx.Config.InfuraKey)
 			client, err := ethclient.Dial(rawurl)
 			if err != nil {

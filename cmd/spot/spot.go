@@ -20,7 +20,7 @@ func SpotMarketCommand(ctx context.Context) *cobra.Command {
 				binanceKey    = ctx.Config.Binance.Key
 				binanceSecret = ctx.Config.Binance.Secret
 				telegramToken = ctx.Config.Telegram.Token
-				telegramUser  = ctx.Config.Telegram.UID
+				telegramUsers = ctx.Config.Telegram.UID
 			)
 
 			settings := ninjabot.Settings{
@@ -28,7 +28,7 @@ func SpotMarketCommand(ctx context.Context) *cobra.Command {
 				Telegram: ninjabot.TelegramSettings{
 					Enabled: true,
 					Token:   telegramToken,
-					Users:   []int{telegramUser},
+					Users:   telegramUsers,
 				},
 			}
 
