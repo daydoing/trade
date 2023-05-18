@@ -85,11 +85,16 @@ func MonitorCommand(ctx context.Context) *cobra.Command {
 								transferEvent.To = common.HexToAddress(v.Topics[2].Hex())
 
 								token := tokens[contractAddress.String()]
-								if exchange, ok := item[transferEvent.To.String()]; ok {
+								if to, ok := item[transferEvent.To.String()]; ok {
 									result := big.NewInt(0)
 									result.Div(transferEvent.Value, big.NewInt(1e+18))
 									if result.Cmp(big.NewInt(1000)) == 1 {
-										content := fmt.Sprintf("%s transferred to %s, number:%s", token, exchange, result.String())
+										from := transferEvent.From.String()
+										if v, ok := item[transferEvent.From.String()]; ok {
+											from = v
+										}
+
+										content := fmt.Sprintf("%s from %s transferred to %s, number:%s", token, from, to, result.String())
 										bot.Notify(content)
 									}
 								}
