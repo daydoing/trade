@@ -26,7 +26,6 @@ type troughShort struct {
 	step                  int
 	quotePositionSize     float64
 	stopLosePoint         float64
-	takeProfitPoint       float64
 	timeframe             string
 	interruptExecution    bool
 	trailingStop          *tools.TrailingStop
@@ -152,7 +151,6 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 
 				t.currentSellGridNumber++
 				t.stopLosePoint = boll + atr*float64(t.currentSellGridNumber+t.step)
-				t.takeProfitPoint = boll - atr*float64(t.currentSellGridNumber+t.step)
 				t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
 			}
 		}
@@ -167,7 +165,6 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 
 				t.currentSellGridNumber++
 				t.stopLosePoint = boll + atr*float64(t.currentSellGridNumber+t.step)
-				t.takeProfitPoint = boll - atr*float64(t.currentSellGridNumber+t.step)
 
 				diff := df.Close.Last(0) - t.stopLosePoint
 				if diff < atr {
@@ -193,10 +190,9 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 		}
 	}
 
-	if absAssetPosition*clossPrice > t.ctx.Config.MinQuote && t.takeProfitPoint != 0 {
+	if absAssetPosition*clossPrice > t.ctx.Config.MinQuote {
 		c1 := df.Low.Crossunder(df.Metadata["lb"])
-		c2 := df.Close.Last(0) <= t.takeProfitPoint
-		if c1 || c2 {
+		if c1 {
 			_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
 			if err != nil {
 				t.ctx.Logger.Error(err)
