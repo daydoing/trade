@@ -128,6 +128,7 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 	absAssetPosition := math.Abs(assetPosition)
 
 	var (
+		leverage   = t.ctx.Config.Leverage
 		highPrice  = df.High.Last(0)
 		clossPrice = df.Close.Last(0)
 		boll       = df.Metadata["boll"].Last(0)
@@ -135,7 +136,7 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 	)
 
 	if t.currentSellGridNumber == 0 {
-		t.quotePositionSize = math.Floor(quotePosition / float64(t.gridNumber))
+		t.quotePositionSize = math.Floor(quotePosition * float64(leverage) / float64(t.gridNumber))
 		if t.quotePositionSize > t.ctx.Config.MinQuote {
 			c1 := df.High.Crossover(df.Metadata["ub"])
 			if c1 {
