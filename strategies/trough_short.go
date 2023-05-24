@@ -152,7 +152,7 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 			}
 		}
 	} else {
-		if df.Close.Last(0) >= t.stopLosePoint {
+		if clossPrice >= t.stopLosePoint {
 			if quotePosition >= t.quotePositionSize {
 				_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, t.quotePositionSize/clossPrice)
 				if err != nil {
@@ -163,7 +163,7 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 				t.currentSellGridNumber++
 				t.stopLosePoint = boll + atr*float64(t.currentSellGridNumber+t.step)
 
-				diff := df.Close.Last(0) - t.stopLosePoint
+				diff := clossPrice - t.stopLosePoint
 				if diff < atr {
 					t.stopLosePoint = t.stopLosePoint + atr
 				}
