@@ -119,7 +119,7 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 		return
 	}
 
-	_, quotePosition, err := broker.Position(df.Pair)
+	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
 		t.ctx.Logger.Error(err)
 		return
@@ -133,7 +133,8 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 		atr        = df.Metadata["atr"].Last(0)
 	)
 
-	quotePosition = quotePosition * float64(leverage)
+	absAssetPosition := math.Abs(assetPosition)
+	quotePosition = quotePosition*float64(leverage) - absAssetPosition*clossPrice
 
 	if t.currentSellGridNumber == 0 {
 		t.quotePositionSize = math.Floor(quotePosition / float64(t.gridNumber))
@@ -170,9 +171,9 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 
 				t.trailingStop.Start(df.Low.Last(0), t.stopLosePoint)
 			} else {
-				if quotePosition > t.ctx.Config.MinQuote {
+				if absAssetPosition*clossPrice > t.ctx.Config.MinQuote {
 					if trailing := t.trailingStop; trailing != nil && trailing.Update(highPrice) {
-						_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, quotePosition/clossPrice)
+						_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
 						if err != nil {
 							t.ctx.Logger.Error(err)
 							return
@@ -187,10 +188,10 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 		}
 	}
 
-	if quotePosition > t.ctx.Config.MinQuote {
+	if absAssetPosition*clossPrice > t.ctx.Config.MinQuote {
 		c1 := df.Low.Crossunder(df.Metadata["lb"])
 		if c1 {
-			_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, quotePosition/clossPrice)
+			_, err := broker.CreateOrderMarket(ninjabot.SideTypeBuy, df.Pair, absAssetPosition)
 			if err != nil {
 				t.ctx.Logger.Error(err)
 				return
