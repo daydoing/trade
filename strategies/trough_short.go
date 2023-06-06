@@ -140,7 +140,8 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 		t.quotePositionSize = math.Floor(quotePosition / float64(t.gridNumber))
 		if t.quotePositionSize > t.ctx.Config.MinQuote {
 			c1 := df.High.Crossover(df.Metadata["ub"])
-			if c1 {
+			c2 := df.Low.Crossunder(df.Metadata["lb"])
+			if c1 && !c2 {
 				_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, t.quotePositionSize/clossPrice)
 				if err != nil {
 					t.ctx.Logger.Error(err)
