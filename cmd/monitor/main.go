@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func MonitorCommand(ctx context.Context) *cobra.Command {
+func MonitorCommand(ctx context.BotContext) *cobra.Command {
 	return &cobra.Command{
 		Use:   "monitor",
 		Short: "monitoring on-chain transfers",

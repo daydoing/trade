@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Context struct {
+type BotContext struct {
 	context.Context
 	Config      *config.Config
 	Logger      *logrus.Logger
@@ -18,23 +18,23 @@ type Context struct {
 	ChainWallet *helper.Wallet
 }
 
-func NewContext() (Context, error) {
+func NewBotContext() (BotContext, error) {
 	c, err := initViper()
 	if err != nil {
-		return Context{}, err
+		return BotContext{}, err
 	}
 
 	l, err := initLogger(c.Sentry)
 	if err != nil {
-		return Context{}, err
+		return BotContext{}, err
 	}
 
 	n, err := initNotifyBot(c.System.Telegram.Token, c.System.Telegram.UID)
 	if err != nil {
-		return Context{}, err
+		return BotContext{}, err
 	}
 
-	return Context{Context: context.Background(), Config: c, Logger: l, NotifyBot: n}, nil
+	return BotContext{Context: context.Background(), Config: c, Logger: l, NotifyBot: n}, nil
 }
 
-func (srv *Context) Gc() {}
+func (srv *BotContext) Gc() {}

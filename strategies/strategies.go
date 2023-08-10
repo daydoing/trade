@@ -16,7 +16,7 @@ const (
 	TROUGH_SHORT = "trough_short"
 )
 
-func Strategy(name string, srv context.Context) (strategy.Strategy, error) {
+func Strategy(name string, srv context.BotContext) (strategy.Strategy, error) {
 	switch name {
 	case EMA:
 		return NewCrossEMA(srv), nil

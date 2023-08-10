@@ -13,11 +13,11 @@ import (
 const BTCUSDT = "BTCUSDT"
 
 type crossEMA struct {
-	ctx       context.Context
+	ctx       context.BotContext
 	dataframe map[string]*ninjabot.Dataframe
 }
 
-func NewCrossEMA(ctx context.Context) strategy.Strategy {
+func NewCrossEMA(ctx context.BotContext) strategy.Strategy {
 	return &crossEMA{ctx: ctx, dataframe: make(map[string]*model.Dataframe)}
 }
 

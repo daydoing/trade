@@ -10,7 +10,7 @@ import (
 	"github.com/daydoing/trade/strategies"
 )
 
-func PaperwalletCommand(ctx context.Context) *cobra.Command {
+func PaperwalletCommand(ctx context.BotContext) *cobra.Command {
 	return &cobra.Command{
 		Use:   "paperwallet",
 		Short: "Paperwallet is a simulated run of trading strategies",

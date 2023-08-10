@@ -13,7 +13,7 @@ import (
 	"github.com/daydoing/trade/context"
 )
 
-func DownloadCommand(ctx context.Context) *cobra.Command {
+func DownloadCommand(ctx context.BotContext) *cobra.Command {
 	return &cobra.Command{
 		Use:   "download",
 		Short: "Download historical data for user backtesting",

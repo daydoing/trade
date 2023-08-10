@@ -9,7 +9,7 @@ import (
 	"github.com/daydoing/trade/strategies"
 )
 
-func FuturesMarketCommand(ctx context.Context) *cobra.Command {
+func FuturesMarketCommand(ctx context.BotContext) *cobra.Command {
 	return &cobra.Command{
 		Use:   "futures",
 		Short: "Running futures trading strategies",

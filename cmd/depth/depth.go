@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func DepthCommand(ctx context.Context) *cobra.Command {
+func DepthCommand(ctx context.BotContext) *cobra.Command {
 	return &cobra.Command{
 		Use:   "depth",
 		Short: "analyzing the depth of a trading pair",

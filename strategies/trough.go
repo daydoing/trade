@@ -19,7 +19,7 @@ const (
 )
 
 type trough struct {
-	ctx                  context.Context
+	ctx                  context.BotContext
 	gridNumber           int
 	currentBuyGridNumber int
 	step                 int
@@ -29,7 +29,7 @@ type trough struct {
 	trailingStop         *tools.TrailingStop
 }
 
-func NewTrough(srv context.Context) strategy.HighFrequencyStrategy {
+func NewTrough(srv context.BotContext) strategy.HighFrequencyStrategy {
 	return &trough{
 		ctx:          srv,
 		step:         1,

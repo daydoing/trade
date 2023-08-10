@@ -15,7 +15,7 @@ import (
 	"github.com/daydoing/trade/strategies"
 )
 
-func BacktestingCommand(ctx context.Context) *cobra.Command {
+func BacktestingCommand(ctx context.BotContext) *cobra.Command {
 	return &cobra.Command{
 		Use:   "backtesting",
 		Short: "Backtesting is to backtest the trading strategy",

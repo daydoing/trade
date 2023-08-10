@@ -20,7 +20,7 @@ func main() {
 		Short: "Traded is a quantitative trading terminal",
 	}
 
-	srv, err := context.NewContext()
+	srv, err := context.NewBotContext()
 	if err != nil {
 		log.Panic(err)
 	}

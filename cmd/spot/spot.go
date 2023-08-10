@@ -9,7 +9,7 @@ import (
 	"github.com/daydoing/trade/strategies"
 )
 
-func SpotMarketCommand(ctx context.Context) *cobra.Command {
+func SpotMarketCommand(ctx context.BotContext) *cobra.Command {
 	return &cobra.Command{
 		Use:   "spot",
 		Short: "Running spot trading strategies",

@@ -19,7 +19,7 @@ const (
 )
 
 type troughShort struct {
-	ctx                   context.Context
+	ctx                   context.BotContext
 	period                int
 	gridNumber            int
 	currentSellGridNumber int
@@ -31,7 +31,7 @@ type troughShort struct {
 	trailingStop          *tools.TrailingStop
 }
 
-func NewTroughShort(srv context.Context) strategy.HighFrequencyStrategy {
+func NewTroughShort(srv context.BotContext) strategy.HighFrequencyStrategy {
 	return &troughShort{
 		ctx:          srv,
 		step:         1,
