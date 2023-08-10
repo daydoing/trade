@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/daydoing/trade/cmd/backtesting"
-	"github.com/daydoing/trade/cmd/depth"
 	"github.com/daydoing/trade/cmd/download"
 	"github.com/daydoing/trade/cmd/futures"
 	"github.com/daydoing/trade/cmd/monitor"
@@ -30,7 +29,6 @@ func main() {
 	cmd.AddCommand(download.DownloadCommand(srv))
 	cmd.AddCommand(spot.SpotMarketCommand(srv))
 	cmd.AddCommand(futures.FuturesMarketCommand(srv))
-	cmd.AddCommand(depth.DepthCommand(srv))
 	cmd.AddCommand(monitor.MonitorCommand(srv))
 
 	if err := cmd.Execute(); err != nil {
