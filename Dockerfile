@@ -1,5 +1,5 @@
 # Use golang as the base image
-FROM docker.io/golang:1.20.2-alpine AS builder
+FROM docker.io/golang:1.21.0-alpine AS builder
 
 # Create a working directory
 WORKDIR /app
