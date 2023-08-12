@@ -47,6 +47,7 @@ func (t *trough) WarmupPeriod() int {
 }
 
 func (t *trough) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndicator {
+	df.Metadata["rsi"] = indicator.RSI(df.Close, 14)
 	df.Metadata["atr"] = indicator.ATR(df.High, df.Low, df.Close, bbPeriod/2)
 	df.Metadata["ub"], df.Metadata["boll"], df.Metadata["lb"] = indicator.BB(df.Close, bbPeriod, deviation, indicator.TypeEMA)
 
@@ -185,7 +186,8 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 
 	if assetPosition*clossPrice > t.ctx.Config.MinQuote {
 		c1 := df.High.Crossover(df.Metadata["ub"])
-		if c1 {
+		c2 := df.Metadata["rsi"].Last(0) >= 80.0
+		if c1 || c2 {
 			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 			if err != nil {
 				t.ctx.Logger.Error(err)
