@@ -16,6 +16,7 @@ const (
 	bbPeriod   = 20
 	deviation  = 3
 	gridNumber = 3
+	maxRSI     = 70.0
 )
 
 type trough struct {
@@ -186,7 +187,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 
 	if assetPosition*clossPrice > t.ctx.Config.MinQuote {
 		c1 := df.High.Crossover(df.Metadata["ub"])
-		c2 := df.Metadata["rsi"].Last(0) >= 80.0
+		c2 := df.Metadata["rsi"].Last(0) >= maxRSI
 		if c1 || c2 {
 			_, err := broker.CreateOrderMarket(ninjabot.SideTypeSell, df.Pair, assetPosition)
 			if err != nil {
