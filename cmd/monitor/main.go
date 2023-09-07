@@ -64,9 +64,8 @@ func MonitorCommand(ctx context.BotContext) *cobra.Command {
 
 					for {
 						select {
-						case err := <-sub.Err():
-							errs <- err
-							return
+						case <-sub.Err():
+							continue
 						case v := <-logs:
 							if v.Address == contractAddress && v.Topics[0] == iface.Events["Transfer"].ID {
 								transferEvent := struct {
