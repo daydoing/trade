@@ -27,7 +27,6 @@ type troughShort struct {
 	quotePositionSize     float64
 	stopLosePoint         float64
 	timeframe             string
-	interruptExecution    bool
 	trailingStop          *tools.TrailingStop
 }
 
@@ -110,15 +109,6 @@ func (t *troughShort) OnPartialCandle(df *ninjabot.Dataframe, broker service.Bro
 }
 
 func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.Broker) {
-	c1 := df.Low.Crossunder(df.Metadata["lb"])
-	if c1 {
-		t.interruptExecution = false
-	}
-
-	if t.interruptExecution {
-		return
-	}
-
 	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
 		t.ctx.Logger.Error(err)
@@ -180,9 +170,9 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 							return
 						}
 
+						t.gridNumber++
 						t.currentSellGridNumber = 0.0
 						t.trailingStop.Stop()
-						t.interruptExecution = true
 					}
 				}
 			}
@@ -198,6 +188,7 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 				return
 			}
 
+			t.gridNumber = 3
 			t.currentSellGridNumber = 0.0
 			t.trailingStop.Stop()
 		}

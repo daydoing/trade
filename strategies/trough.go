@@ -26,7 +26,6 @@ type trough struct {
 	step                 int
 	quotePositionSize    float64
 	stopLosePoint        float64
-	interruptExecution   bool
 	trailingStop         *tools.TrailingStop
 }
 
@@ -108,15 +107,6 @@ func (t *trough) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) 
 }
 
 func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker) {
-	c1 := df.High.Crossover(df.Metadata["ub"])
-	if c1 {
-		t.interruptExecution = false
-	}
-
-	if t.interruptExecution {
-		return
-	}
-
 	assetPosition, quotePosition, err := broker.Position(df.Pair)
 	if err != nil {
 		t.ctx.Logger.Error(err)
@@ -176,8 +166,8 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 
 						t.ctx.Logger.Info("Important reminder: the market situation may reverse.")
 
+						t.gridNumber++
 						t.currentBuyGridNumber = 0.0
-						t.interruptExecution = true
 						t.trailingStop.Stop()
 					}
 				}
@@ -195,6 +185,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 				return
 			}
 
+			t.gridNumber = 3
 			t.currentBuyGridNumber = 0.0
 			t.trailingStop.Stop()
 		}
