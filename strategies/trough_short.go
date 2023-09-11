@@ -170,6 +170,8 @@ func (t *troughShort) execShortStrategy(df *ninjabot.Dataframe, broker service.B
 							return
 						}
 
+						t.ctx.NotifyBot.Notify("Important reminder: the market situation may reverse.")
+
 						t.gridNumber++
 						t.currentSellGridNumber = 0.0
 						t.trailingStop.Stop()

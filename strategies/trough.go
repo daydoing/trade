@@ -164,7 +164,7 @@ func (t *trough) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker)
 							return
 						}
 
-						t.ctx.Logger.Info("Important reminder: the market situation may reverse.")
+						t.ctx.NotifyBot.Notify("Important reminder: the market situation may reverse.")
 
 						t.gridNumber++
 						t.currentBuyGridNumber = 0.0
