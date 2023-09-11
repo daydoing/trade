@@ -23,6 +23,7 @@ func MonitorCommand(ctx context.BotContext) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			bot := ctx.NotifyBot
 			rawurl := fmt.Sprintf("wss://mainnet.infura.io/ws/v3/%s", ctx.Config.InfuraKey)
+		REPEAT:
 			client, err := ethclient.Dial(rawurl)
 			if err != nil {
 				log.Fatalf("Failed to connect to the Ethereum network: %v", err)
@@ -65,7 +66,8 @@ func MonitorCommand(ctx context.BotContext) *cobra.Command {
 					for {
 						select {
 						case <-sub.Err():
-							continue
+							errs <- err
+							return
 						case v := <-logs:
 							if v.Address == contractAddress && v.Topics[0] == iface.Events["Transfer"].ID {
 								transferEvent := struct {
@@ -108,7 +110,7 @@ func MonitorCommand(ctx context.BotContext) *cobra.Command {
 			content := fmt.Sprintf("error:%s, the bot is stoped", err.Error())
 			bot.Notify(content)
 
-			return err
+			goto REPEAT
 		},
 	}
 }
