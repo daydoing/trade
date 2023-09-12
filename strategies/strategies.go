@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	EMA          = "ema"
-	ARBITRAGE    = "arbitrage"
-	TROUGH       = "trough"
-	TROUGH_SHORT = "trough_short"
+	EMA           = "ema"
+	ARBITRAGE     = "arbitrage"
+	TROUGH        = "trough"
+	TROUGH_SHORT  = "trough_short"
+	Ticker_Killer = "ticker_killer"
 )
 
 func Strategy(name string, srv context.BotContext) (strategy.Strategy, error) {
@@ -26,6 +27,8 @@ func Strategy(name string, srv context.BotContext) (strategy.Strategy, error) {
 		return NewTroughShort(srv), nil
 	case ARBITRAGE:
 		return arbitrage.NewArbitrage(srv)
+	case Ticker_Killer:
+		return NewTickerKiller(srv), nil
 	default:
 		return nil, errors.New("unsupported trading strategy")
 	}
