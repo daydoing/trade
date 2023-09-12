@@ -37,7 +37,7 @@ type (
 	}
 )
 
-func NewTickerKiller(srv context.BotContext) strategy.HighFrequencyStrategy {
+func NewTickerKiller(srv context.BotContext) strategy.Strategy {
 	tk := &tickerKiller{ctx: srv}
 
 	c1 := condition{name: crossunderLowerband, weight: 0.2}
@@ -71,20 +71,7 @@ func NewTickerKiller(srv context.BotContext) strategy.HighFrequencyStrategy {
 
 	}
 
-	c3 := condition{name: rsi30, weight: 0.5}
-	c3.callback = func(df *ninjabot.Dataframe, broker service.Broker, quote float64) (model.Order, error) {
-		if quote*c3.weight >= tk.ctx.Config.MinQuote {
-			order, err := broker.CreateOrderMarketQuote(ninjabot.SideTypeBuy, df.Pair, quote*c3.weight-10)
-			if err != nil {
-				return model.Order{}, err
-			}
-
-			return order, nil
-		}
-		return model.Order{}, nil
-	}
-
-	tk.buyConditions = []condition{c1, c2, c3}
+	tk.buyConditions = []condition{c1, c2}
 
 	return tk
 }
@@ -113,14 +100,6 @@ func (t *tickerKiller) Indicators(df *ninjabot.Dataframe) []strategy.ChartIndica
 
 // source data's timeframe must less then t.timeframe, otherwise it's will be panic for HighFrequencyStrategy
 func (t *tickerKiller) OnCandle(df *ninjabot.Dataframe, broker service.Broker) {
-	t.execLongStrategy(df, broker)
-}
-
-func (t *tickerKiller) OnPartialCandle(df *ninjabot.Dataframe, broker service.Broker) {
-	t.execLongStrategy(df, broker)
-}
-
-func (t *tickerKiller) execLongStrategy(df *ninjabot.Dataframe, broker service.Broker) {
 	asset, quote, err := broker.Position(df.Pair)
 	if err != nil {
 		t.ctx.Logger.Error(err)
